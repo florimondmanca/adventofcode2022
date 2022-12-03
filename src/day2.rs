@@ -46,12 +46,6 @@ fn get_outcome_score(outcome: Outcome) -> i32 {
     };
 }
 
-fn get_input() -> Result<String, Box<dyn Error>> {
-    let p = Path::new("inputs/2.txt");
-    let content = fs::read_to_string(p)?;
-    return Ok(content);
-}
-
 fn part1(content: String) -> Result<(), Box<dyn Error>> {
     let mut score = 0;
 
@@ -123,7 +117,7 @@ fn part2(content: String) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let content = get_input()?;
+    let content = fs::read_to_string(Path::new("inputs/2.txt"))?;
     part1(content.clone())?;
     part2(content.clone())?;
     Ok(())

@@ -3,12 +3,15 @@ use std::error::Error;
 mod day1;
 mod day2;
 
+fn title(s: &str) {
+    println!("\n{}", s);
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("Day 1: Calories -- https://adventofcode.com/2022/day/1");
+    title("Day 1: Calories");
     day1::run()?;
 
-    println!();
-    println!("Day 2: Rock Paper Scissors -- https://adventofcode.com/2022/day/2");
+    title("Day 2: Rock Paper Scissors");
     day2::run()?;
 
     Ok(())

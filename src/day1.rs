@@ -3,14 +3,8 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-fn get_input() -> Result<String, Box<dyn Error>> {
-    let path = Path::new("inputs/1.txt");
-    let content = fs::read_to_string(path)?;
-    return Ok(content);
-}
-
 pub fn run() -> Result<(), Box<dyn Error>> {
-    let content = get_input()?;
+    let content = fs::read_to_string(Path::new("inputs/1.txt"))?;
 
     let mut elves = Vec::new();
 
