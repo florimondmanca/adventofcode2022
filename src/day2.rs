@@ -2,71 +2,28 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-#[derive(Clone)]
-enum Shape {
-    Rock,
-    Paper,
-    Scissors,
-}
-
-#[derive(Clone)]
-enum Outcome {
-    Win,
-    Draw,
-    Lose,
-}
-
-fn get_shape_score(s: Shape) -> i32 {
-    return match s {
-        Shape::Rock => 1,
-        Shape::Paper => 2,
-        Shape::Scissors => 3,
-    };
-}
-
-fn get_outcome(opponent: Shape, player: Shape) -> Outcome {
-    return match (opponent, player) {
-        (Shape::Rock, Shape::Rock) => Outcome::Draw,
-        (Shape::Rock, Shape::Paper) => Outcome::Win,
-        (Shape::Rock, Shape::Scissors) => Outcome::Lose,
-        (Shape::Paper, Shape::Rock) => Outcome::Lose,
-        (Shape::Paper, Shape::Paper) => Outcome::Draw,
-        (Shape::Paper, Shape::Scissors) => Outcome::Win,
-        (Shape::Scissors, Shape::Rock) => Outcome::Win,
-        (Shape::Scissors, Shape::Paper) => Outcome::Lose,
-        (Shape::Scissors, Shape::Scissors) => Outcome::Draw,
-    };
-}
-
-fn get_outcome_score(outcome: Outcome) -> i32 {
-    return match outcome {
-        Outcome::Win => 6,
-        Outcome::Draw => 3,
-        Outcome::Lose => 0,
-    };
-}
-
 fn part1(content: String) -> Result<(), Box<dyn Error>> {
     let mut score = 0;
 
+    let score_matrix = vec![
+        //           X, Y, Z (player)
+        /* A */ vec![3, 6, 0],
+        /* B */ vec![0, 3, 6],
+        /* C */ vec![6, 0, 3],
+        /* (opponent) */
+    ];
+
     for line in content.lines() {
-        let opponent = match line.chars().nth(0) {
-            Some('A') => Shape::Rock,
-            Some('B') => Shape::Paper,
-            Some('C') => Shape::Scissors,
-            _ => panic!("invalid line"),
-        };
+        // A, B, C -> 0, 1, 2 (rock, paper, scissors)
+        let opponent = line.chars().nth(0).unwrap() as usize - ('A' as usize);
 
-        let player = match line.chars().nth(2) {
-            Some('X') => Shape::Rock,
-            Some('Y') => Shape::Paper,
-            Some('Z') => Shape::Scissors,
-            _ => panic!("invalid line"),
-        };
+        // X, Y, Z -> 0, 1, 2 (rock, paper, scissors)
+        let player = line.chars().nth(2).unwrap() as usize - ('X' as usize);
 
-        let outcome = get_outcome(opponent, player.clone());
+        let outcome_score = score_matrix[opponent][player];
+        let player_score = player + 1;
 
-        score += get_outcome_score(outcome) + get_shape_score(player.clone());
+        score += outcome_score + player_score;
     }
 
     println!("Answer (part 1): {}", score);
@@ -74,41 +31,40 @@ fn part1(content: String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn choose_move(opponent: Shape, outcome: Outcome) -> Shape {
-    return match (opponent, outcome) {
-        (Shape::Rock, Outcome::Win) => Shape::Paper,
-        (Shape::Rock, Outcome::Lose) => Shape::Scissors,
-        (Shape::Rock, Outcome::Draw) => Shape::Rock,
-        (Shape::Paper, Outcome::Win) => Shape::Scissors,
-        (Shape::Paper, Outcome::Lose) => Shape::Rock,
-        (Shape::Paper, Outcome::Draw) => Shape::Paper,
-        (Shape::Scissors, Outcome::Win) => Shape::Rock,
-        (Shape::Scissors, Outcome::Lose) => Shape::Paper,
-        (Shape::Scissors, Outcome::Draw) => Shape::Scissors,
-    };
-}
-
 fn part2(content: String) -> Result<(), Box<dyn Error>> {
     let mut score = 0;
 
     for line in content.lines() {
-        let opponent = match line.chars().nth(0) {
-            Some('A') => Shape::Rock,
-            Some('B') => Shape::Paper,
-            Some('C') => Shape::Scissors,
-            _ => panic!("invalid line"),
-        };
+        // A, B, C -> 0, 1, 2 (rock, paper, scissors)
+        let opponent = line.chars().nth(0).unwrap() as usize - ('A' as usize);
 
-        let outcome = match line.chars().nth(2) {
-            Some('X') => Outcome::Lose,
-            Some('Y') => Outcome::Draw,
-            Some('Z') => Outcome::Win,
-            _ => panic!("invalid line"),
-        };
+        // X, Y, Z -> 0, 1, 2 (lose, draw, win)
+        let outcome = line.chars().nth(2).unwrap() as usize - ('X' as usize);
 
-        let player = choose_move(opponent, outcome.clone());
+        /*
+        If the opponent's move is arranged as this 3-cycle...
 
-        score += get_outcome_score(outcome.clone()) + get_shape_score(player);
+              <--
+          +-- Rock --+
+          |          |
+          |          |
+        Paper --- Scissors
+              -->
+
+        Then:
+
+        * To lose (outcome 0), choose the previous move (shift by -1, aka 0+2 mod 3).
+        * To draw (outcome 1), choose the same move     (shift by 0,  aka 1+2 mod 3).
+        * To win  (outcome 2), choose the next move     (shift by +1, aka 2+2 mod3).
+        */
+
+        let shift = (outcome + 2) % 3;
+        let player = (opponent + shift) % 3;
+
+        let outcome_score = outcome * 3;
+        let player_score = player + 1;
+
+        score += outcome_score + player_score;
     }
 
     println!("Answer (part 2): {}", score);
