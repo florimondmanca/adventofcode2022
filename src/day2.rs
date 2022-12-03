@@ -1,8 +1,7 @@
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-fn part1(content: String) -> Result<(), Box<dyn Error>> {
+fn part1(content: String) {
     let mut score = 0;
 
     let score_matrix = vec![
@@ -27,11 +26,9 @@ fn part1(content: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!("Answer (part 1): {}", score);
-
-    Ok(())
 }
 
-fn part2(content: String) -> Result<(), Box<dyn Error>> {
+fn part2(content: String) {
     let mut score = 0;
 
     for line in content.lines() {
@@ -68,13 +65,10 @@ fn part2(content: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!("Answer (part 2): {}", score);
-
-    Ok(())
 }
 
-pub fn run() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string(Path::new("inputs/2.txt"))?;
-    part1(content.clone())?;
-    part2(content.clone())?;
-    Ok(())
+pub fn run() {
+    let content = fs::read_to_string(Path::new("inputs/2.txt")).unwrap();
+    part1(content.clone());
+    part2(content.clone());
 }

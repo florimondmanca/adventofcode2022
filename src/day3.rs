@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -17,7 +16,7 @@ fn get_priority(item_type: char) -> u32 {
     }
 }
 
-fn part1(content: String) -> Result<(), Box<dyn Error>> {
+fn part1(content: String) {
     let mut sum_of_priorities = 0;
 
     for line in content.lines() {
@@ -40,11 +39,9 @@ fn part1(content: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!("Answer (part 1): {}", sum_of_priorities);
-
-    Ok(())
 }
 
-fn part2(content: String) -> Result<(), Box<dyn Error>> {
+fn part2(content: String) {
     let mut sum_of_priorities = 0;
 
     for chunk in &content.lines().chunks(3) {
@@ -67,13 +64,10 @@ fn part2(content: String) -> Result<(), Box<dyn Error>> {
     }
 
     println!("Answer (part 2): {}", sum_of_priorities);
-
-    Ok(())
 }
 
-pub fn run() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string(Path::new("inputs/3.txt"))?;
-    part1(content.clone())?;
-    part2(content.clone())?;
-    Ok(())
+pub fn run() {
+    let content = fs::read_to_string(Path::new("inputs/3.txt")).unwrap();
+    part1(content.clone());
+    part2(content.clone());
 }

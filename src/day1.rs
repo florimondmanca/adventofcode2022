@@ -1,10 +1,9 @@
 use itertools::sorted;
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 
-pub fn run() -> Result<(), Box<dyn Error>> {
-    let content = fs::read_to_string(Path::new("inputs/1.txt"))?;
+pub fn run() {
+    let content = fs::read_to_string(Path::new("inputs/1.txt")).unwrap();
 
     let mut elves = Vec::new();
 
@@ -26,6 +25,4 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let total_top3_calories = sorted(elves).rev().take(3).sum::<i32>();
     println!("Answer (part 2): {}", total_top3_calories);
-
-    Ok(())
 }
