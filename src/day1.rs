@@ -1,3 +1,4 @@
+use itertools::sorted;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -11,22 +12,26 @@ fn get_input() -> Result<String, Box<dyn Error>> {
 pub fn run() -> Result<(), Box<dyn Error>> {
     let content = get_input()?;
 
-    let mut max_calories = 0;
-    let mut calories = 0;
+    let mut elves = Vec::new();
 
-    for line in content.lines() {
-        if line.is_empty() {
-            if calories > max_calories {
-                max_calories = calories;
+    {
+        let mut calories = 0;
+
+        for line in content.lines() {
+            if line.is_empty() {
+                elves.push(calories);
+                calories = 0;
+            } else {
+                calories += line.parse::<i32>().unwrap();
             }
-            calories = 0;
-            continue;
         }
-
-        calories += line.parse::<i32>().unwrap();
     }
 
-    println!("Answer: {}", max_calories);
+    let max_calories = elves.iter().max().unwrap();
+    println!("Answer (part 1): {}", max_calories);
+
+    let total_top3_calories = sorted(elves).rev().take(3).sum::<i32>();
+    println!("Answer (part 2): {}", total_top3_calories);
 
     Ok(())
 }
