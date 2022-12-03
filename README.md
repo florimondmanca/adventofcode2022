@@ -1,6 +1,6 @@
 # adventofcode2022
 
-Using [Advent Of Code 2022](https://adventofcode.com/2022/) to spice up my programming language fu.
+Answers to [Advent Of Code 2022](https://adventofcode.com/2022/) written in Rust.
 
 ## Requirements
 
