@@ -1,6 +1,7 @@
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn title(s: &str) {
     println!("\n{}", s);
@@ -15,4 +16,7 @@ fn main() {
 
     title("Day 3: Rucksack Reorganization");
     day3::run();
+
+    title("Day 4: Camp Cleanup");
+    day4::run();
 }
