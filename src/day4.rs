@@ -2,17 +2,38 @@ use itertools::Itertools;
 
 pub fn run() {
     let content = include_str!("inputs/4.txt");
-    part1(content);
-}
 
-fn part1(content: &str) {
-    let num_overlap = content
+    let num_full_overlaps = content
         .lines()
-        .map(read_sorted_ranges)
-        .map(|(smallest, longest)| longest.contains(smallest) as u32)
+        .map(read_ranges)
+        .map(|(a, b)| -> (Range, Range) {
+            if a.length() <= b.length() {
+                (a, b)
+            } else {
+                (b, a)
+            }
+        })
+        .map(|(smallest, longest)| {
+            (longest.start <= smallest.start && smallest.end <= longest.end) as u32
+        })
         .sum::<u32>();
 
-    println!("Answer (part 1): {}", num_overlap);
+    println!("Answer (part 1): {num_full_overlaps}");
+
+    let num_overlaps = content
+        .lines()
+        .map(read_ranges)
+        .map(|(a, b)| -> (Range, Range) {
+            if a.start <= b.start {
+                (a, b)
+            } else {
+                (b, a)
+            }
+        })
+        .map(|(leftmost, rightmost)| (rightmost.start <= leftmost.end) as u32)
+        .sum::<u32>();
+
+    println!("Answer (part 2): {num_overlaps}");
 }
 
 struct Range {
@@ -28,27 +49,19 @@ impl Range {
     fn length(&self) -> u32 {
         self.end - self.start
     }
-
-    fn contains(&self, other: Range) -> bool {
-        return self.start <= other.start && other.end <= self.end;
-    }
 }
 
-fn read_sorted_ranges(line: &str) -> (Range, Range) {
+fn read_ranges(line: &str) -> (Range, Range) {
+    // 1-3,5-8 -> ((1, 3), (5, 8))
     line.split(',')
-        .map(read_range)
-        .take(2)
-        .sorted_by(|a, b| a.length().cmp(&b.length()))
+        .map(|rng| {
+            rng.split('-')
+                .map(|section| section.parse::<u32>().unwrap())
+                .tuples()
+                .map(|(start, end)| Range::new(start, end))
+                .nth(0)
+                .unwrap()
+        })
         .collect_tuple()
-        .unwrap()
-}
-
-fn read_range(rng: &str) -> Range {
-    rng.split('-')
-        .map(|x| x.parse::<u32>().unwrap())
-        .take(2)
-        .tuples()
-        .map(|(start, end)| Range::new(start, end))
-        .nth(0)
         .unwrap()
 }
