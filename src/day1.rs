@@ -1,9 +1,7 @@
 use itertools::sorted;
-use std::fs;
-use std::path::Path;
 
 pub fn run() {
-    let content = fs::read_to_string(Path::new("inputs/1.txt")).unwrap();
+    let content = include_str!("inputs/1.txt");
 
     let mut elves = Vec::new();
 

@@ -1,7 +1,10 @@
-use std::fs;
-use std::path::Path;
+pub fn run() {
+    let content = include_str!("inputs/2.txt");
+    part1(content);
+    part2(content);
+}
 
-fn part1(content: String) {
+fn part1(content: &str) {
     let mut score = 0;
 
     let score_matrix = vec![
@@ -28,7 +31,7 @@ fn part1(content: String) {
     println!("Answer (part 1): {}", score);
 }
 
-fn part2(content: String) {
+fn part2(content: &str) {
     let mut score = 0;
 
     for line in content.lines() {
@@ -65,10 +68,4 @@ fn part2(content: String) {
     }
 
     println!("Answer (part 2): {}", score);
-}
-
-pub fn run() {
-    let content = fs::read_to_string(Path::new("inputs/2.txt")).unwrap();
-    part1(content.clone());
-    part2(content.clone());
 }

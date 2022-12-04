@@ -1,22 +1,23 @@
 use itertools::Itertools;
 use std::collections::HashSet;
-use std::fs;
-use std::path::Path;
 
-const ASCII_UPPERCASE_A: u32 = 65;
-const ASCII_LOWERCASE_A: u32 = 97;
+pub fn run() {
+    let content = include_str!("inputs/3.txt");
+    part1(content);
+    part2(content);
+}
 
 fn get_priority(item_type: char) -> u32 {
     let code = item_type as u32;
 
     if item_type.is_lowercase() {
-        return code - ASCII_LOWERCASE_A + 1;
+        return code - 'a' as u32 + 1;
     } else {
-        return code - ASCII_UPPERCASE_A + 27;
+        return code - 'A' as u32 + 27;
     }
 }
 
-fn part1(content: String) {
+fn part1(content: &str) {
     let mut sum_of_priorities = 0;
 
     for line in content.lines() {
@@ -41,7 +42,7 @@ fn part1(content: String) {
     println!("Answer (part 1): {}", sum_of_priorities);
 }
 
-fn part2(content: String) {
+fn part2(content: &str) {
     let mut sum_of_priorities = 0;
 
     for chunk in &content.lines().chunks(3) {
@@ -64,10 +65,4 @@ fn part2(content: String) {
     }
 
     println!("Answer (part 2): {}", sum_of_priorities);
-}
-
-pub fn run() {
-    let content = fs::read_to_string(Path::new("inputs/3.txt")).unwrap();
-    part1(content.clone());
-    part2(content.clone());
 }
