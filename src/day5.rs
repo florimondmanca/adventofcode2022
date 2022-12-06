@@ -3,6 +3,24 @@ use itertools::Itertools;
 pub fn run() {
     let content = include_str!("inputs/5.txt");
 
+    let mut message;
+
+    message = solve(content, &apply_crate_mover_9000);
+    println!("Answer (part 1): {message}");
+
+    message = solve(content, &apply_crate_mover_9001);
+    println!("Answer (part 2): {message}");
+}
+
+type Stacks = Vec<Vec<char>>;
+
+struct Move {
+    quantity: u32,
+    source: usize,
+    dest: usize,
+}
+
+fn solve(content: &str, apply_move: &dyn Fn(Move, &mut Stacks)) -> String {
     let (drawing, moves) = content.split_once("\n\n").unwrap();
 
     let mut stacks = parse_stacks(drawing);
@@ -12,21 +30,10 @@ pub fn run() {
         .map(parse_move)
         .for_each(|mv| apply_move(mv, &mut stacks));
 
-    let message = stacks
-        .iter()
-        .map(|stack| stack.last().unwrap())
-        .collect::<String>();
-
-    println!("Answer (part 1): {message}");
+    return get_top_crates(stacks);
 }
 
-struct Move {
-    quantity: u32,
-    source: usize,
-    dest: usize,
-}
-
-fn parse_stacks(drawing: &str) -> Vec<Vec<char>> {
+fn parse_stacks(drawing: &str) -> Stacks {
     let reversed_drawing = drawing
         .lines()
         .rev()
@@ -43,7 +50,7 @@ fn parse_stacks(drawing: &str) -> Vec<Vec<char>> {
         .parse::<u32>()
         .unwrap();
 
-    let mut stacks: Vec<Vec<char>> = Vec::from_iter((0..num_stacks).map(|_| Vec::new()));
+    let mut stacks: Stacks = Vec::from_iter((0..num_stacks).map(|_| Vec::new()));
 
     content.lines().for_each(|line| {
         line.chars()
@@ -77,9 +84,31 @@ fn parse_move(line: &str) -> Move {
         dest: dest - 1,
     };
 }
-fn apply_move(mv: Move, stacks: &mut Vec<Vec<char>>) {
+
+fn apply_crate_mover_9000(mv: Move, stacks: &mut Stacks) {
     for _ in 0..mv.quantity {
         let item = stacks[mv.source].pop().unwrap();
         stacks[mv.dest].push(item);
     }
+}
+
+fn apply_crate_mover_9001(mv: Move, stacks: &mut Stacks) {
+    let mut items = Vec::new();
+
+    for _ in 0..mv.quantity {
+        let item = stacks[mv.source].pop().unwrap();
+        items.push(item);
+    }
+
+    for _ in 0..mv.quantity {
+        let item = items.pop().unwrap();
+        stacks[mv.dest].push(item);
+    }
+}
+
+fn get_top_crates(stacks: Stacks) -> String {
+    return stacks
+        .iter()
+        .map(|stack| stack.last().unwrap())
+        .collect::<String>();
 }
