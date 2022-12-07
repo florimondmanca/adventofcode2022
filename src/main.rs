@@ -4,6 +4,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 fn title(s: &str) {
     println!("\n{}", s);
@@ -27,4 +28,7 @@ fn main() {
 
     title("Day 6: Tuning Trouble");
     day6::run();
+
+    title("Day 7: No Space Left On Device");
+    day7::run();
 }
