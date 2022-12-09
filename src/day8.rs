@@ -24,6 +24,6 @@ fn parse_heights(content: &str) -> Heights {
   return heights;
 }
 
-fn count_visible(heights: &Heights) -> u32 {
+fn count_visible(heights: Heights) -> u32 {
   return 0;
 }
