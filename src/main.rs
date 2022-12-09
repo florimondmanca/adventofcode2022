@@ -5,6 +5,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod day8;
 
 fn title(s: &str) {
     println!("\n{}", s);
@@ -31,4 +32,7 @@ fn main() {
 
     title("Day 7: No Space Left On Device");
     day7::run();
+    
+    title("Day 8: Treetop Tree House");
+    day8::run();
 }
