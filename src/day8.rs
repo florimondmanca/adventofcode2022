@@ -30,20 +30,19 @@ fn parse_heights(content: &str) -> Heights {
 fn count_visible(heights: Heights) -> u32 {
   let visible: HashSet<(usize, usize)> = HashSet::new();
   let n = heights.len();
-  let last = n - 1;
   
-  for row in 0..last {
-    for col in first..last {
+  for row in 0..n {
+    for col in 0..n {
       let h = heights.get(row, col)).unwrap();
       let hl = heights.get((row, 0)).unwrap();
-      let hr = heights.get((col, last)).unwrap();
-      let ht = heights.get((0, q)).unwrap();
-      let hb = heights.get((last, q)).unwrap();
+      let hr = heights.get((row, n - 1)).unwrap();
+      let ht = heights.get((0, col)).unwrap();
+      let hb = heights.get((n - 1, col)).unwrap();
       if
         (col > 0 && h < hl)
-        || (col < last && h < hr)
+        || (col < n - 1 && h < hr)
         || (row > 0 && h < ht)
-        || (row < last && h < hb) {
+        || (row < n - 1 && h < hb) {
         visible.insert((i, j));
       } 
     }
