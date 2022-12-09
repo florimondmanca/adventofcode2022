@@ -4,6 +4,7 @@ use std::collections::HashSet;
 pub fn run() {
   let content = include_str!("inputs/8.txt");
   let heights = parse_heights(content);
+  dbg!(&heights);
   let count = count_visible(heights);
   println!("Answer (part 1): {count}");
 }
@@ -12,7 +13,6 @@ type Heights = HashMap<(usize, usize), u32>;
 
 fn parse_heights(content: &str) -> Heights {
   let mut heights: Heights = HashMap::new();
-  let n = content.lines().count();
   
   for (i, line) in content.lines().enumerate() {
     line
