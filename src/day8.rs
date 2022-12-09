@@ -33,7 +33,7 @@ fn count_visible(heights: Heights) -> u32 {
   
   for row in 0..n {
     for col in 0..n {
-      let h = heights.get(row, col)).unwrap();
+      let h = heights.get((row, col)).unwrap();
       let hl = heights.get((row, 0)).unwrap();
       let hr = heights.get((row, n - 1)).unwrap();
       let ht = heights.get((0, col)).unwrap();
