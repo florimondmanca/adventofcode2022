@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 pub fn run() {
   let content = include_str!("inputs/8.txt");
@@ -18,12 +19,35 @@ fn parse_heights(content: &str) -> Heights {
       .chars()
       .map(|c| c.to_digit(10).unwrap())
       .enumerate()
-      .for_each(|(j, h)| heights.insert((i, j), h));
+      .for_each(|(j, h)| {
+        heights.insert((i, j), h);
+      });
   }
   
   return heights;
 }
 
 fn count_visible(heights: Heights) -> u32 {
-  return 0;
+  let visible: HashSet<(usize, usize)> = HashSet::new();
+  let n = heights.len();
+  let last = n - 1;
+  
+  for row in 0..last {
+    for col in first..last {
+      let h = heights.get(row, col)).unwrap();
+      let hl = heights.get((row, 0)).unwrap();
+      let hr = heights.get((col, last)).unwrap();
+      let ht = heights.get((0, q)).unwrap();
+      let hb = heights.get((last, q)).unwrap();
+      if
+        (col > 0 && h < hl)
+        || (col < last && h < hr)
+        || (row > 0 && h < ht)
+        || (row < last && h < hb) {
+        visible.insert((i, j));
+      } 
+    }
+  }
+ 
+  return visible.len() as u32;
 }
