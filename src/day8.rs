@@ -33,13 +33,13 @@ fn count_visible(heights: Heights) -> u32 {
   
   for row in 0..n {
     for col in 0..n {
-      let h = heights.get((row, col)).unwrap();
-      let hl = heights.get((row, 0)).unwrap();
-      let hr = heights.get((row, n - 1)).unwrap();
-      let ht = heights.get((0, col)).unwrap();
-      let hb = heights.get((n - 1, col)).unwrap();
+      let h = heights.get(&(row, col)).unwrap();
+      let hl = heights.get(&(row, 0)).unwrap();
+      let hr = heights.get(&(row, n - 1)).unwrap();
+      let ht = heights.get(&(0, col)).unwrap();
+      let hb = heights.get(&(n - 1, col)).unwrap();
       if (col > 0 && h < hl) || (col < n - 1 && h < hr) || (row > 0 && h < ht) || (row < n - 1 && h < hb) {
-        visible.insert((i, j));
+        visible.insert((row, col));
       }
     }
   }
