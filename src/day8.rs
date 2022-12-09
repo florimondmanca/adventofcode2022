@@ -38,11 +38,7 @@ fn count_visible(heights: Heights) -> u32 {
       let hr = heights.get((row, n - 1)).unwrap();
       let ht = heights.get((0, col)).unwrap();
       let hb = heights.get((n - 1, col)).unwrap();
-      if
-        (col > 0 && h < hl)
-        || (col < n - 1 && h < hr)
-        || (row > 0 && h < ht)
-        || (row < n - 1 && h < hb) {
+      if (col > 0 && h < hl) || (col < n - 1 && h < hr) || (row > 0 && h < ht) || (row < n - 1 && h < hb) {
         visible.insert((i, j));
       } 
     }
