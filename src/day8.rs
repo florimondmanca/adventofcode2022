@@ -53,7 +53,7 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
       for prev in 0..row {
         let hp = heights.get(&(prev, col)).unwrap();
         if h < hp {
-          vright = false;
+          vtop = false;
           break;
         }
       }
@@ -75,7 +75,7 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
         if h < hp {
           vright = false;
           break;
-        } 
+        }
       }
  
       if vright {
