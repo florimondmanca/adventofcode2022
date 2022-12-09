@@ -11,7 +11,7 @@ type Heights = HashMap<(usize, usize), u32>;
 
 fn parse_heights(content: &str) -> Heights {
   let heights: Heights = HashMap::new();
-  let n = content.lines().len();
+  let n = content.lines().count();
   
   for (i, line) in content.lines().enumerate() {
     line
