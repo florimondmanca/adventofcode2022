@@ -16,7 +16,7 @@ fn parse_heights(content: &str) -> Heights {
   for (i, line) in content.lines().enumerate() {
     line
       .chars()
-      .map(|c| c.to_digit().unwrap())
+      .map(|c| c.to_digit(10).unwrap())
       .enumerate()
       .for_each(|(j, h)| heights.insert((i, j), h));
   }
