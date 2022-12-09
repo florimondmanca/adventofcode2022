@@ -11,7 +11,7 @@ pub fn run() {
 type Heights = HashMap<(usize, usize), u32>;
 
 fn parse_heights(content: &str) -> Heights {
-  let heights: Heights = HashMap::new();
+  let mut heights: Heights = HashMap::new();
   let n = content.lines().count();
   
   for (i, line) in content.lines().enumerate() {
@@ -28,7 +28,7 @@ fn parse_heights(content: &str) -> Heights {
 }
 
 fn count_visible(heights: Heights) -> u32 {
-  let visible: HashSet<(usize, usize)> = HashSet::new();
+  let mut visible: HashSet<(usize, usize)> = HashSet::new();
   let n = heights.len();
   
   for row in 0..n {
