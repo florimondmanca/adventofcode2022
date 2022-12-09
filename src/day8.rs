@@ -38,7 +38,7 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
  
       for prev in 0..col {
         let hp = heights.get(&(row, prev)).unwrap();
-        if h < hp {
+        if h <= hp {
           vleft = false;
           break;
         } 
@@ -46,13 +46,14 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
  
       if vleft {
         visible.insert((row, col));
+        continue;
       }
       
       let mut vtop = true;
       
       for prev in 0..row {
         let hp = heights.get(&(prev, col)).unwrap();
-        if h < hp {
+        if h <= hp {
           vtop = false;
           break;
         }
@@ -66,13 +67,17 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
   
   for row in (0..n).rev() {
     for col in (0..n).rev() {
+      if visible.contains(&(row, col)) {
+        continue;
+      }
+  
       let h = heights.get(&(row, col)).unwrap();
      
       let mut vright = true;
  
-      for prev in (col + 1..n).rev() {
+      for prev in col + 1..n {
         let hp = heights.get(&(row, prev)).unwrap();
-        if h < hp {
+        if h <= hp {
           vright = false;
           break;
         }
@@ -80,13 +85,14 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
  
       if vright {
         visible.insert((row, col));
+        continue;
       }
       
       let mut vbottom = true;
       
-      for prev in (row + 1..n).rev() {
+      for prev in row + 1..n {
         let hp = heights.get(&(prev, col)).unwrap();
-        if h < hp {
+        if h <= hp {
           vbottom = false;
           break;
         }
