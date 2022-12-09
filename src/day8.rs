@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-fn run() {
+pub fn run() {
   let content = include_str!("inputs/8.txt");
   let heights = parse_heights(content);
   let count = count_visible(heights);
