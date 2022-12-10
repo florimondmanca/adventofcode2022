@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
-use itertools::iproduct;
 
 pub fn run() {
   let content = include_str!("inputs/8.txt");
@@ -13,8 +12,8 @@ pub fn run() {
     .map(|(row, col, h)| {
       grid
         .view_from(row, col)
-        .iter()
-        .any(|direction| direction.all(|hd| hd < h))
+        .into_iter()
+        .any(|direction| direction.into_iter().all(|hd| hd < h))
     }) 
     .map(|b| b as u32)
     .sum::<u32>();
@@ -64,21 +63,21 @@ impl Grid {
     vec![
       // Left
       (0..col - 1)
-        .map(|c| self.heights.get(&(row, c)).unwrap())
+        .map(|c| self.get(row, c)
         .collect::<Vec<u32>>(), 
       // Right
       (col + 1..self.size)
         .rev() 
-        .map(|c| self.heights.get(&(row, c)).unwrap())
+        .map(|c| self.get((row, c)))
         .collect::<Vec<u32>>(),
       // Down
       (row + 1..self.size)
         .rev()
-        .map(|r| self.heights.get(&(r, col)).unwrap())
+        .map(|r| self.get(r, col)))
         .collect::<Vec<u32>>(),
       // Up
       (0..row - 1)
-        .map(|r| self.heights.get(&(r, col)).unwrap()) 
+        .map(|r| self.get(r, col)))
         .collect::<Vec<u32>>(),
     ]
   } 
