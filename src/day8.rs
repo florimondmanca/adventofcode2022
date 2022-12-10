@@ -1,16 +1,29 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use itertools::iproduct;
 
 pub fn run() {
   let content = include_str!("inputs/8.txt");
-  let (heights, n) = parse_heights(content);
-  let count = count_visible(heights, n);
+  let grid = parse(content);
+  let count = count_visible(grid);
   println!("Answer (part 1): {count}");
+
+  let num_visible = grid
+    .cells()
+    .map(|(row, col)| {
+      grid
+        .view_from(row, col)
+        .any(|direction| direction.all(|hd| hd < h))
+    }) 
+    .map(|b| b as u32)
+    .sum::<u32>();
+  
+  println!("Answer (part 1) (alt): {num_visible}");
 }
 
 type Heights = HashMap<(usize, usize), u32>;
 
-fn parse_heights(content: &str) -> (Heights, usize) {
+fn parse(content: &str) -> Grid {
   let mut heights: Heights = HashMap::new();
   let n = content.lines().count();
  
@@ -24,20 +37,66 @@ fn parse_heights(content: &str) -> (Heights, usize) {
       });
   }
   
-  return (heights, n);
+  return Grid::new(heights, n);
 }
 
-fn count_visible(heights: Heights, n: usize) -> u32 {
+struct Grid {
+  map: Heights, 
+  size: usize,
+}
+
+impl Grid {
+  fn new(map: Heights, size: usize) -> Self {
+    Self { map, size }
+  }
+  
+  fn get(&self row: usize, col: usize) -> u32 {
+    self.get(&(row, col)).unwrap()
+  }
+  
+  fn cells(&self) -> impl Iterator<(usize, usize)> {
+    return iproduct(
+      (0..self.size), (0..self.size)
+    );
+  } 
+ 
+  fn view_from(&self, row: usize, col: usize) -> Vec<Vec<u32>> {
+    vec![
+      // Left
+      (0..col - 1)
+        .map(|c| heights.get(&(row, c)).unwrap())
+        .collect::<Vec<u32>>(), 
+      // Right
+      (col + 1..n)
+        .rev() 
+        .map(|c| heights.get(&(row, c)).unwrap())
+        .collect::<Vec<u32>>(),
+      // Down
+      (row + 1..n)
+        .rev()
+        .map(|r| heights.get(&(r, col))
+        .collect::<Vec<u32>>(),
+      // Up
+      (0..row - 1)
+        .map(|r| heights.get(&(r, col))
+        collect::<Vec<u32>>(),
+    ]
+  } 
+}
+
+fn count_visible(grid: Grid) -> u32 {
   let mut visible: HashSet<(usize, usize)> = HashSet::new();
   
+  let n = grid.size;
+ 
   for row in 0..n {
     for col in 0..n {
-      let h = heights.get(&(row, col)).unwrap();
+      let h = grid.get(row, col);
      
       let mut vleft = true;
  
       for prev in 0..col {
-        let hp = heights.get(&(row, prev)).unwrap();
+        let hp = grid.get(row, prev);
         if h <= hp {
           vleft = false;
           break;
@@ -52,7 +111,7 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
       let mut vtop = true;
       
       for prev in 0..row {
-        let hp = heights.get(&(prev, col)).unwrap();
+        let hp = grid.get(prev, col);
         if h <= hp {
           vtop = false;
           break;
@@ -71,12 +130,12 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
         continue;
       }
   
-      let h = heights.get(&(row, col)).unwrap();
+      let h = grid.get(row, col);
      
       let mut vright = true;
  
       for prev in col + 1..n {
-        let hp = heights.get(&(row, prev)).unwrap();
+        let hp = grid.get(row, prev);
         if h <= hp {
           vright = false;
           break;
@@ -91,7 +150,7 @@ fn count_visible(heights: Heights, n: usize) -> u32 {
       let mut vbottom = true;
       
       for prev in row + 1..n {
-        let hp = heights.get(&(prev, col)).unwrap();
+        let hp = grid.get(prev, col);
         if h <= hp {
           vbottom = false;
           break;
