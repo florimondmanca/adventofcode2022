@@ -79,7 +79,7 @@ impl Grid {
       // Up
       (0..row - 1)
         .map(|r| self.heights.get(&(r, col)).unwrap()) 
-        collect::<Vec<u32>>(),
+        .collect::<Vec<u32>>(),
     ]
   } 
 }
