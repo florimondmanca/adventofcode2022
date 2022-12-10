@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use itertools::iproduct;
 
 pub fn run() {
   let content = include_str!("inputs/8.txt");
