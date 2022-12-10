@@ -55,8 +55,8 @@ impl Grid {
   }
   
   fn cells(&self) -> impl Iterator<Item = (usize, usize, u32)> {
-    return iproduct!(0..self.size, 0..self.size)
-      .map(|(r, c)| (r, c, self.get(r, c))):
+    iproduct!(0..self.size, 0..self.size)
+      .map(|(r, c)| (r, c, self.get(r, c)))
   } 
  
   fn view_from(&self, row: usize, col: usize) -> Vec<Vec<u32>> {
