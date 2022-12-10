@@ -1,11 +1,16 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 
+use take_until::TakeUntilExt;
+
 pub fn run() {
     let content = include_str!("inputs/8.txt");
     let grid = parse(content);
     let count = count_visible(&grid);
     println!("Answer (part 1): {count}");
+
+    let score = maximize_scenic_score(&grid);
+    println!("Answer (part 2): {score}");
 }
 
 type GridMap = HashMap<(usize, usize), u32>;
@@ -77,4 +82,49 @@ fn count_visible(grid: &Grid) -> u32 {
     }
 
     return visible.len() as u32;
+}
+
+fn maximize_scenic_score(grid: &Grid) -> u32 {
+    let n = grid.size;
+    let mut highest = 0;
+
+    for row in 0..n {
+        for col in 0..n {
+            let h = grid.get(row, col);
+
+            let score = vec![
+                // Up
+                (0..row)
+                    .rev()
+                    .map(|r| grid.get(r, col))
+                    .take_until(|&hp| hp >= h)
+                    .count(),
+                // Down
+                (row + 1..n)
+                    .map(|r| grid.get(r, col))
+                    .take_until(|&hp| hp >= h)
+                    .count(),
+                // Left
+                (0..col)
+                    .rev()
+                    .map(|c| grid.get(row, c))
+                    .into_iter()
+                    .take_until(|&hp| hp >= h)
+                    .count(),
+                // Right
+                (col + 1..n)
+                    .map(|c| grid.get(row, c))
+                    .take_until(|&hp| hp >= h)
+                    .count(),
+            ]
+            .into_iter()
+            .product::<usize>() as u32;
+
+            if score > highest {
+                highest = score;
+            }
+        }
+    }
+
+    highest
 }
