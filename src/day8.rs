@@ -54,8 +54,8 @@ impl Grid {
     self.heights.get(&(row, col)).unwrap()
   }
   
-  fn cells(&self) -> impl Iterator<(usize, usize)> {
-    return iproduct(
+  fn cells(&self) -> impl Iterator<T = (usize, usize)> {
+    return iproduct!(
       (0..self.size), (0..self.size)
     );
   } 
@@ -67,12 +67,12 @@ impl Grid {
         .map(|c| self.heights.get(&(row, c)).unwrap())
         .collect::<Vec<u32>>(), 
       // Right
-      (col + 1..n)
+      (col + 1..self.size)
         .rev() 
         .map(|c| self.heights.get(&(row, c)).unwrap())
         .collect::<Vec<u32>>(),
       // Down
-      (row + 1..n)
+      (row + 1..self.size)
         .rev()
         .map(|r| self.heights.get(&(r, col)).unwrap())
         .collect::<Vec<u32>>(),
