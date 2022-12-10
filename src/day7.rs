@@ -75,7 +75,7 @@ fn parse(content: &str) -> Rc<Directory> {
                     let d = cwd.sub_dirs.borrow().get(dirname).unwrap().clone();
                     cwd = d;
                 }
-            }
+            },
             ("dir", dirname) => {
                 let parent = Some(Rc::clone(&cwd));
                 let sub_dir = Rc::new(Directory::new(parent));

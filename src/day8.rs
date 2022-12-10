@@ -2,107 +2,79 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub fn run() {
-  let content = include_str!("inputs/8.txt");
-  let (heights, n) = parse_heights(content);
-  let count = count_visible(heights, n);
-  println!("Answer (part 1): {count}");
+    let content = include_str!("inputs/8.txt");
+    let grid = parse(content);
+    let count = count_visible(&grid);
+    println!("Answer (part 1): {count}");
 }
 
-type Heights = HashMap<(usize, usize), u32>;
+type GridMap = HashMap<(usize, usize), u32>;
 
-fn parse_heights(content: &str) -> (Heights, usize) {
-  let mut heights: Heights = HashMap::new();
-  let n = content.lines().count();
- 
-  for (i, line) in content.lines().enumerate() {
-    line
-      .chars()
-      .map(|c| c.to_digit(10).unwrap())
-      .enumerate()
-      .for_each(|(j, h)| {
-        heights.insert((i, j), h);
-      });
-  }
-  
-  return (heights, n);
+struct Grid {
+    map: GridMap,
+    size: usize,
 }
 
-fn count_visible(heights: Heights, n: usize) -> u32 {
-  let mut visible: HashSet<(usize, usize)> = HashSet::new();
-  
-  for row in 0..n {
-    for col in 0..n {
-      let h = heights.get(&(row, col)).unwrap();
-     
-      let mut vleft = true;
- 
-      for prev in 0..col {
-        let hp = heights.get(&(row, prev)).unwrap();
-        if h <= hp {
-          vleft = false;
-          break;
-        } 
-      }
- 
-      if vleft {
-        visible.insert((row, col));
-        continue;
-      }
-      
-      let mut vtop = true;
-      
-      for prev in 0..row {
-        let hp = heights.get(&(prev, col)).unwrap();
-        if h <= hp {
-          vtop = false;
-          break;
-        }
-      }
-      
-      if vtop {
-        visible.insert((row, col));
-      } 
+impl Grid {
+    fn new(map: GridMap, size: usize) -> Self {
+        Self { map, size }
     }
-  }
-  
-  for row in (0..n).rev() {
-    for col in (0..n).rev() {
-      if visible.contains(&(row, col)) {
-        continue;
-      }
-  
-      let h = heights.get(&(row, col)).unwrap();
-     
-      let mut vright = true;
- 
-      for prev in col + 1..n {
-        let hp = heights.get(&(row, prev)).unwrap();
-        if h <= hp {
-          vright = false;
-          break;
-        }
-      }
- 
-      if vright {
-        visible.insert((row, col));
-        continue;
-      }
-      
-      let mut vbottom = true;
-      
-      for prev in row + 1..n {
-        let hp = heights.get(&(prev, col)).unwrap();
-        if h <= hp {
-          vbottom = false;
-          break;
-        }
-      }
-      
-      if vbottom {
-        visible.insert((row, col));
-      }
+
+    fn get(&self, row: usize, col: usize) -> u32 {
+        self.map.get(&(row, col)).unwrap().clone()
     }
-  } 
-  
-  return visible.len() as u32;
+}
+
+fn parse(content: &str) -> Grid {
+    let mut map: GridMap = HashMap::new();
+    let size = content.lines().count();
+
+    for (i, line) in content.lines().enumerate() {
+        line.chars()
+            .map(|c| c.to_digit(10).unwrap())
+            .enumerate()
+            .for_each(|(j, h)| {
+                map.insert((i, j), h);
+            });
+    }
+
+    return Grid::new(map, size);
+}
+
+fn count_visible(grid: &Grid) -> u32 {
+    let mut visible: HashSet<(usize, usize)> = HashSet::new();
+    let n = grid.size;
+
+    for row in 0..n {
+        for col in 0..n {
+            let h = grid.get(row, col);
+
+            let vleft = (0..col).map(|c| grid.get(row, c)).all(|hp| hp < h);
+            if vleft {
+                visible.insert((row, col));
+            }
+
+            let vtop = (0..row).map(|r| grid.get(r, col)).all(|hp| hp < h);
+            if vtop {
+                visible.insert((row, col));
+            }
+
+            let row = n - 1 - row;
+            let col = n - 1 - col;
+
+            let h = grid.get(row, col);
+
+            let vright = (col + 1..n).map(|c| grid.get(row, c)).all(|hp| hp < h);
+            if vright {
+                visible.insert((row, col));
+            }
+
+            let vbottom = (row + 1..n).map(|r| grid.get(r, col)).all(|hp| hp < h);
+            if vbottom {
+                visible.insert((row, col));
+            }
+        }
+    }
+
+    return visible.len() as u32;
 }
