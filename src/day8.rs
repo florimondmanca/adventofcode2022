@@ -10,7 +10,7 @@ pub fn run() {
 
   let num_visible = grid
     .cells()
-    .map(|(row, col)| {
+    .map(|(row, col, h)| {
       grid
         .view_from(row, col)
         .any(|direction| direction.all(|hd| hd < h))
@@ -54,10 +54,9 @@ impl Grid {
     self.heights.get(&(row, col)).unwrap()
   }
   
-  fn cells(&self) -> impl Iterator<T = (usize, usize)> {
-    return iproduct!(
-      (0..self.size), (0..self.size)
-    );
+  fn cells(&self) -> impl Iterator<Item = (usize, usize, u32)> {
+    return iproduct!(0..self.size, 0..self.size)
+      .map(|(r, c)| (r, c, self.get(r, c));
   } 
  
   fn view_from(&self, row: usize, col: usize) -> Vec<Vec<u32>> {
