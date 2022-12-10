@@ -9,6 +9,7 @@ pub fn run() {
   println!("Answer (part 1): {count}");
 
   let num_visible = grid
+    .clone()
     .cells()
     .map(|(row, col, h)| {
       grid
