@@ -41,17 +41,17 @@ fn parse(content: &str) -> Grid {
 }
 
 struct Grid {
-  map: Heights, 
+  heights: Heights, 
   size: usize,
 }
 
 impl Grid {
-  fn new(map: Heights, size: usize) -> Self {
-    Self { map, size }
+  fn new(heights: Heights, size: usize) -> Self {
+    Self { heights, size }
   }
   
-  fn get(&self row: usize, col: usize) -> u32 {
-    self.get(&(row, col)).unwrap()
+  fn get(&self, row: usize, col: usize) -> u32 {
+    self.heights.get(&(row, col)).unwrap()
   }
   
   fn cells(&self) -> impl Iterator<(usize, usize)> {
