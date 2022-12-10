@@ -63,21 +63,21 @@ impl Grid {
     vec![
       // Left
       (0..col - 1)
-        .map(|c| self.get(row, c)
+        .map(|c| self.get(row, c))
         .collect::<Vec<u32>>(), 
       // Right
       (col + 1..self.size)
         .rev() 
-        .map(|c| self.get((row, c)))
+        .map(|c| self.get(row, c))
         .collect::<Vec<u32>>(),
       // Down
       (row + 1..self.size)
         .rev()
-        .map(|r| self.get(r, col)))
+        .map(|r| self.get(r, col))
         .collect::<Vec<u32>>(),
       // Up
       (0..row - 1)
-        .map(|r| self.get(r, col)))
+        .map(|r| self.get(r, col))
         .collect::<Vec<u32>>(),
     ]
   } 
