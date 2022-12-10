@@ -13,6 +13,7 @@ pub fn run() {
     .map(|(row, col, h)| {
       grid
         .view_from(row, col)
+        .iter()
         .any(|direction| direction.all(|hd| hd < h))
     }) 
     .map(|b| b as u32)
@@ -51,12 +52,12 @@ impl Grid {
   }
   
   fn get(&self, row: usize, col: usize) -> u32 {
-    self.heights.get(&(row, col)).unwrap()
+    self.heights.get(&(row, col)).unwrap().clone()
   }
   
   fn cells(&self) -> impl Iterator<Item = (usize, usize, u32)> {
     return iproduct!(0..self.size, 0..self.size)
-      .map(|(r, c)| (r, c, self.get(r, c));
+      .map(|(r, c)| (r, c, self.get(r, c))):
   } 
  
   fn view_from(&self, row: usize, col: usize) -> Vec<Vec<u32>> {
