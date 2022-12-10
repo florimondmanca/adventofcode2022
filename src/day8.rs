@@ -55,7 +55,7 @@ impl Grid {
     self.heights.get(&(row, col)).unwrap().clone()
   }
   
-  fn cells(&self) -> impl Iterator<Item = (usize, usize, u32)> {
+  fn cells(&self) -> impl Iterator<Item = (usize, usize, u32)> + '_ {
     iproduct!(0..self.size, 0..self.size)
       .map(|(r, c)| (r, c, self.get(r, c)))
   } 
