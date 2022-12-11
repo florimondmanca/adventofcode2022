@@ -20,7 +20,10 @@ struct Move {
     dest: usize,
 }
 
-fn solve(content: &str, apply_move: &dyn Fn(Move, &mut Stacks)) -> String {
+fn solve<F>(content: &str, apply_move: F) -> String
+where
+    F: Fn(Move, &mut Stacks),
+{
     let (drawing, moves) = content.split_once("\n\n").unwrap();
 
     let mut stacks = parse_stacks(drawing);
