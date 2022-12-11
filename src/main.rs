@@ -8,6 +8,7 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
 
 fn title(s: &str) {
     println!("\n{}", s);
@@ -43,4 +44,7 @@ fn main() {
 
     title("Day 10: Cathode-Ray Tube");
     day10::run();
+
+    title("Day 11: Monkey In The Middle");
+    day11::run();
 }

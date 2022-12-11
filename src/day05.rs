@@ -5,10 +5,10 @@ pub fn run() {
 
     let mut message;
 
-    message = solve(content, &apply_crate_mover_9000);
+    message = solve(content, apply_crate_mover_9000);
     println!("Answer (part 1): {message}");
 
-    message = solve(content, &apply_crate_mover_9001);
+    message = solve(content, apply_crate_mover_9001);
     println!("Answer (part 2): {message}");
 }
 
@@ -20,10 +20,7 @@ struct Move {
     dest: usize,
 }
 
-fn solve<F>(content: &str, apply_move: F) -> String
-where
-    F: Fn(Move, &mut Stacks),
-{
+fn solve(content: &str, apply_move: fn(Move, &mut Stacks)) -> String {
     let (drawing, moves) = content.split_once("\n\n").unwrap();
 
     let mut stacks = parse_stacks(drawing);
