@@ -1,4 +1,5 @@
 mod day1;
+mod day10;
 mod day2;
 mod day3;
 mod day4;
@@ -39,4 +40,7 @@ fn main() {
 
     title("Day 9: Rope Bridge");
     day9::run();
+
+    title("Day 10: Cathode-Ray Tube");
+    day10::run();
 }
