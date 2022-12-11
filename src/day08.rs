@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use take_until::TakeUntilExt;
 
 pub fn run() {
-    let content = include_str!("inputs/8.txt");
+    let content = include_str!("inputs/08.txt");
     let grid = parse(content);
     let count = count_visible(&grid);
     println!("Answer (part 1): {count}");

@@ -1,13 +1,13 @@
-mod day1;
+mod day01;
+mod day02;
+mod day03;
+mod day04;
+mod day05;
+mod day06;
+mod day07;
+mod day08;
+mod day09;
 mod day10;
-mod day2;
-mod day3;
-mod day4;
-mod day5;
-mod day6;
-mod day7;
-mod day8;
-mod day9;
 
 fn title(s: &str) {
     println!("\n{}", s);
@@ -15,31 +15,31 @@ fn title(s: &str) {
 
 fn main() {
     title("Day 1: Calories");
-    day1::run();
+    day01::run();
 
     title("Day 2: Rock Paper Scissors");
-    day2::run();
+    day02::run();
 
     title("Day 3: Rucksack Reorganization");
-    day3::run();
+    day03::run();
 
     title("Day 4: Camp Cleanup");
-    day4::run();
+    day04::run();
 
     title("Day 5: Supply Stacks");
-    day5::run();
+    day05::run();
 
     title("Day 6: Tuning Trouble");
-    day6::run();
+    day06::run();
 
     title("Day 7: No Space Left On Device");
-    day7::run();
+    day07::run();
 
     title("Day 8: Treetop Tree House");
-    day8::run();
+    day08::run();
 
     title("Day 9: Rope Bridge");
-    day9::run();
+    day09::run();
 
     title("Day 10: Cathode-Ray Tube");
     day10::run();

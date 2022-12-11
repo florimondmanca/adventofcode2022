@@ -2,7 +2,7 @@ use itertools::Itertools;
 use std::collections::HashSet;
 
 pub fn run() {
-    let content = include_str!("inputs/3.txt");
+    let content = include_str!("inputs/03.txt");
 
     let common_sum = content
         .lines()

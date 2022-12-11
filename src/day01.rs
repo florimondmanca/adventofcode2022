@@ -1,7 +1,7 @@
 use itertools::sorted;
 
 pub fn run() {
-    let content = include_str!("inputs/1.txt");
+    let content = include_str!("inputs/01.txt");
 
     let mut elves = Vec::new();
 

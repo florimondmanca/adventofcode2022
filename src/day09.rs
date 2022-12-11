@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 pub fn run() {
-    let content = include_str!("inputs/9.txt");
+    let content = include_str!("inputs/09.txt");
     let moves = parse(content);
 
     let rope = vec![(0, 0), (0, 0)];

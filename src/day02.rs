@@ -1,5 +1,5 @@
 pub fn run() {
-    let content = include_str!("inputs/2.txt");
+    let content = include_str!("inputs/02.txt");
     part1(content);
     part2(content);
 }

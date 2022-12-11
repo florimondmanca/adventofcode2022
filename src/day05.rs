@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 pub fn run() {
-    let content = include_str!("inputs/5.txt");
+    let content = include_str!("inputs/05.txt");
 
     let mut message;
 

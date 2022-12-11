@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 pub fn run() {
-    let content = include_str!("inputs/4.txt");
+    let content = include_str!("inputs/04.txt");
 
     let num_full_overlaps = content
         .lines()

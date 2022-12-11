@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 pub fn run() {
-    let content = include_str!("inputs/7.txt");
+    let content = include_str!("inputs/07.txt");
 
     let root = parse(content);
 

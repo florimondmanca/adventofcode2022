@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 pub fn run() {
-    let content = include_str!("inputs/6.txt");
+    let content = include_str!("inputs/06.txt");
 
     let num_processed = find_marker_start(4, content);
     println!("Answer (part 1): {num_processed}");
