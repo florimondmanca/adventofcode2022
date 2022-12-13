@@ -20,13 +20,14 @@ make
 | Text processing | all | |
 | `Vec` | all | |
 | `HashSet` | 3, 9 | |
-| `HashMap` | 7, 8 | |
+| `HashMap` | 7, 8, 12 | |
+| `VecDeque` | 11, 12 | |
 | Range | 5, 8, 9 | |
 | Struct | 4, 5 | |
 | Integer maths | 9 | `abs()`, `signum()`, `%` |
 | Type aliases | 5 | |
 | Sort | 1, 11 | |
-| `char` to ASCII code | 3 | E.g. `'a' as u32` |
+| `char` to ASCII code | 3, 12 | E.g. `'a' as u32` |
 | Chunking w/ `.tuples()` | 3 | Uses `itertools` |
 | Closures (`|| -> (...)`) | 10 | |
 | `Fn`: Closure or function as parameter | 5, 11 | SO discussion : [How do you pass a Rust function as a parameter?](https://stackoverflow.com/questions/36390665/how-do-you-pass-a-rust-function-as-a-parameter) |
