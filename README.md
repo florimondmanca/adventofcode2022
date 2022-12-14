@@ -24,6 +24,7 @@ make
 | `VecDeque` | 11, 12 | |
 | Range | 5, 8, 9 | |
 | Struct | 4, 5 | |
+| Enum | 13 | |
 | Integer maths | 9 | `abs()`, `signum()`, `%` |
 | Type aliases | 5 | |
 | Sort | 1, 11 | |
@@ -37,6 +38,7 @@ make
 | `Vec` of `Vec` manipulation | 5 | |
 | Circular references w/ `Rc` and `RefCell` | 7 | Full discussion: [Rust data structures with circular references](https://eli.thegreenplace.net/2021/rust-data-structures-with-circular-references/) |
 | Interior mutability w/ `RefCell` | 11 | The Book: [`RefCell<T>` and the interior mutability pattern](https://doc.rust-lang.org/book/ch15-05-interior-mutability.html) |
+| Custom ordering w/ `Ord` and `PartialOrd` traits | 13 | See [page in the Book](https://doc.rust-lang.org/stable/book/appendix-03-derivable-traits.html#partialord-and-ord-for-ordering-comparisons) | 
 
 ## License
 
