@@ -20,15 +20,20 @@ make
 | Text processing | all | |
 | `Vec` | all | |
 | `HashSet` | 3, 9 | |
-| `HashMap` | 7, 8, 12 | |
+| `HashMap` | 7, 8, 12, 14 | |
 | `VecDeque` | 11, 12 | |
-| Range | 5, 8, 9 | |
-| Struct | 4, 5 | |
+| Range | 5, 8, 9, 14 | |
+| Struct | 4, 5, ... | |
 | Enum | 13 | |
+| `loop { ... } ` | 6, 14 | |
+| `match` | 7, 9, 11, 13, 14 | |
+| `Some` / `None` | 7, 12, 13, 14 | |
+| `while let Some(...) = ...` | 11, 12 | |
 | Integer maths | 9 | `abs()`, `signum()`, `%` |
 | Type aliases | 5 | |
-| Sort | 1, 11 | |
+| Sort | 1, 11, 13, 14 | |
 | `char` to ASCII code | 3, 12 | E.g. `'a' as u32` |
+| Advanced formatting | 14 | |
 | Chunking w/ `.tuples()` | 3 | Uses `itertools` |
 | Closures (`|| -> (...)`) | 10 | |
 | `Fn`: Closure or function as parameter | 5, 11 | SO discussion : [How do you pass a Rust function as a parameter?](https://stackoverflow.com/questions/36390665/how-do-you-pass-a-rust-function-as-a-parameter) |
