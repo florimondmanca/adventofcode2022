@@ -13,6 +13,7 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day16;
 
 fn main() {
     let slow_enabled = false;
@@ -61,6 +62,9 @@ fn main() {
 
     title("Day 15: Beacon Exclusion Zone");
     slow(|| day15::run(), slow_enabled);
+
+    title("Day 16: Proboscidea Volcanium");
+    slow(|| day16::run(), slow_enabled);
 }
 
 fn title(s: &str) {
