@@ -14,11 +14,9 @@ mod day13;
 mod day14;
 mod day15;
 
-fn title(s: &str) {
-    println!("\n{}", s);
-}
-
 fn main() {
+    let slow_enabled = false;
+
     title("Day 1: Calories");
     day01::run();
 
@@ -53,14 +51,26 @@ fn main() {
     day11::run();
 
     title("Day 12: Hill Climbing Algorithm");
-    day12::run();
+    slow(|| day12::run(), slow_enabled);
 
     title("Day 13: Distress Signal");
     day13::run();
 
     title("Day 14: Regolith Reservoir");
-    day14::run();
+    slow(|| day14::run(), slow_enabled);
 
     title("Day 15: Beacon Exclusion Zone");
-    day15::run();
+    slow(|| day15::run(), slow_enabled);
+}
+
+fn title(s: &str) {
+    println!("\n{}", s);
+}
+
+fn slow(day: fn() -> (), enabled: bool) {
+    if enabled {
+        day();
+    } else {
+        println!("<skipped: slow>");
+    }
 }
