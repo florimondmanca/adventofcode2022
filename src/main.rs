@@ -14,6 +14,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 
 fn main() {
     let slow_enabled = false;
@@ -65,6 +66,9 @@ fn main() {
 
     title("Day 16: Proboscidea Volcanium");
     slow(|| day16::run(), slow_enabled);
+
+    title("Day 17: Pyroclastic Flow");
+    day17::run();
 }
 
 fn title(s: &str) {
