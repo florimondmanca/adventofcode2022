@@ -1,105 +1,133 @@
+use std::ops::Range;
+
+use itertools::Itertools;
 use regex::Regex;
-use std::{collections::HashMap, ops::Range};
 
 pub fn run() {
     let example = include_str!("inputs/15.example.txt");
-    let map = parse(example);
-    map.show();
-    println!("Example (Part 1): {}", map.count_excluded(10));
+    let sensors = parse(example);
+    println!("Example (Part 1): {}", count_beacon_forbidden(sensors, 10));
 
     let content = include_str!("inputs/15.txt");
-    let map = parse(content);
-    println!("Answer (Part 1): {}", map.count_excluded(200000));
+    let sensors = parse(content);
+    println!("Answer (Part 1): {}", count_beacon_forbidden(sensors, 2000000));
 }
 
-type Node = (i32, i32);
-type Cells = HashMap<Node, char>;
+fn count_beacon_forbidden(sensors: Vec<Sensor>, y: i32) -> usize {
+    let views = sensors.iter().map(|s| s.get_view(y)).collect();
 
-struct Map {
-    cells: Cells,
-    xs: Range<i32>,
-    ys: Range<i32>,
+    reduce(views)
+        .iter()
+        .map(|range| (range.end - range.start) as usize)
+        .sum::<usize>() - 1 // 1 beacon must be on this row
 }
 
-impl Map {
-    fn new(cells: Cells, xs: Range<i32>, ys: Range<i32>) -> Self {
-        Self { cells, xs, ys }
+struct Point2D {
+    x: i32,
+    y: i32,
+}
+
+impl Point2D {
+    fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+}
+
+struct Sensor {
+    loc: Point2D,
+    radius: i32,
+}
+
+impl Sensor {
+    fn new(loc: Point2D, closest_beacon: Point2D) -> Self {
+        let radius = (closest_beacon.x - loc.x).abs() + (closest_beacon.y - loc.y).abs();
+        Self { loc, radius }
     }
 
-    fn show(&self) {
-        for y in self.ys.clone() {
-            print!("{y:<4} ");
-            for x in self.xs.clone() {
-                match self.cells.get(&(x, y)) {
-                    Some(c) => print!("{}", c),
-                    None => print!("."),
-                }
+    fn get_view(&self, y: i32) -> Range<i32> {
+        /*
+        Return the range of columns that this sensor can view when on row `y`.
+
+        E.g. if sensor is at 43,132 with radius 3 and y is 133, we return columns (10, 11, 12, 13, 14):
+
+               1
+               2
+               #
+              ###
+             #####
+        132 ###S###
+        133  -----
+              ###
+               #
+         */
+        let dy = (self.loc.y - y).abs(); // 1
+        let dx = Ord::max(0, self.radius - dy); // 3 - 1 = 2
+        let start = self.loc.x - dx; // 12 - 2 = 10
+        let end = self.loc.x + dx; // 12 + 2 = 14
+        start..end + 1 // 10..15 (15 excluded)
+    }
+}
+
+fn reduce(views: Vec<Range<i32>>) -> Vec<Range<i32>> {
+    // Convert a list of ranges to a version without overlaps.
+
+    if views.len() <= 1 {
+        return views;
+    }
+
+    // Sort by ascending range `start`.
+    let sorted = views
+        .into_iter()
+        .sorted_by(|a, b| Ord::cmp(&a.start, &b.start))
+        .collect::<Vec<Range<i32>>>();
+
+    // Start from the left-most range, then push or merge following ranges.
+
+    let first = sorted.first().unwrap();
+
+    sorted
+        .iter()
+        .skip(1)
+        .fold(vec![first.start..first.end], |mut acc, range| {
+            let last = acc.last().unwrap();
+
+            let overlaps = range.start <= last.end;
+
+            if overlaps {
+                let end = Ord::max(last.end, range.end);
+                let merged_range = last.start..end;
+                let last_index = acc.len() - 1;
+                acc[last_index] = merged_range;
+            } else {
+                acc.push(range.start..range.end);
             }
-            println!();
-        }
-    }
 
-    fn count_excluded(&self, y: i32) -> usize {
-        self.xs
-            .clone()
-            .map(|x| *self.cells.get(&(x, y)).unwrap_or(&'.'))
-            .filter(|&c| c == '#')
-            .count()
-    }
+            acc
+        })
 }
 
-fn parse(content: &str) -> Map {
-    let mut cells: Cells = HashMap::new();
+fn parse(content: &str) -> Vec<Sensor> {
+    let mut sensors: Vec<Sensor> = Vec::new();
 
     let re =
         Regex::new(r"Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)")
             .unwrap();
 
-    let mut xs = 0..0;
-    let mut ys = 0..0;
-
     for line in content.lines() {
         let cap = re.captures(line).unwrap();
 
-        let x_s = cap[1].parse::<i32>().unwrap();
-        let y_s = cap[2].parse::<i32>().unwrap();
-        let x_b = cap[3].parse::<i32>().unwrap();
-        let y_b = cap[4].parse::<i32>().unwrap();
+        let loc = Point2D::new(
+            cap[1].parse::<i32>().unwrap(),
+            cap[2].parse::<i32>().unwrap(),
+        );
 
-        for x in vec![x_s, x_b] {
-            if x < xs.start {
-                xs = x..xs.end;
-            }
-            if x > xs.end {
-                xs = xs.start..x;
-            }
-        }
+        let closest_beacon = Point2D::new(
+            cap[3].parse::<i32>().unwrap(),
+            cap[4].parse::<i32>().unwrap(),
+        );
 
-        for y in vec![y_s, y_b] {
-            if y < ys.start {
-                ys = y..ys.end;
-            }
-            if y > ys.end {
-                ys = ys.start..y;
-            }
-        }
-
-        cells.insert((x_s, y_s), 'S');
-        cells.insert((x_b, y_b), 'B');
-
-        // All locations within this radius of S cannot contain a beacon.
-        let radius = (x_b - x_s).abs() + (y_b - y_s).abs();
-
-        for dy in -radius..radius + 1 {
-            let y = y_s + dy;
-            let dx = radius - dy.abs();
-            for x in x_s - dx..x_s + dx + 1 {
-                if !cells.contains_key(&(x, y)) {
-                    cells.insert((x, y), '#');
-                }
-            }
-        }
+        sensors.push(Sensor::new(loc, closest_beacon));
     }
 
-    Map::new(cells, xs, ys)
+    sensors
 }
