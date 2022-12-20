@@ -1,17 +1,23 @@
 use std::collections::HashSet;
 
-pub fn run() {
-    let content = include_str!("inputs/06.txt");
+fn main() {
+    println!("Tuning Trouble");
 
-    let num_processed = find_marker_start(4, content);
-    println!("Answer (part 1): {num_processed}");
-
-    let num_processed = find_marker_start(14, content);
-    println!("Answer (part 2): {num_processed}");
+    let input = &advent_of_code::read_file("inputs", 6);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
-fn find_marker_start(size: usize, content: &str) -> usize {
-    let mut chars = content.chars();
+fn part1(input: &str) -> Option<usize> {
+    Some(find_marker_start(4, input))
+}
+
+fn part2(input: &str) -> Option<usize> {
+    Some(find_marker_start(14, input))
+}
+
+fn find_marker_start(size: usize, input: &str) -> usize {
+    let mut chars = input.chars();
     let mut window = Vec::new();
     let mut num_processed = 0;
 

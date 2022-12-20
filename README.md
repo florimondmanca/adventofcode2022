@@ -8,8 +8,16 @@ Rust code solutions to [Advent Of Code 2022](https://adventofcode.com/2022/).
 
 ## Usage
 
+Compute and show solutions using:
+
 ```
 make
+```
+
+Some solutions take a long time to compute, so they're skipped by default. To compute them too, use:
+
+```
+make all-slow
 ```
 
 ## Index

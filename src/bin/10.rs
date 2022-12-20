@@ -1,6 +1,12 @@
-pub fn run() {
-    let content = include_str!("inputs/10.txt");
+fn main() {
+    println!("Cathode-Ray Tube");
 
+    let input = &advent_of_code::read_file("inputs", 10);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<i32> {
     let mut strength = 0;
 
     let mut on_cycle1 = |x: i32, cycle: i32| {
@@ -9,9 +15,12 @@ pub fn run() {
         }
     };
 
-    simulate(content, &mut on_cycle1);
-    println!("Answer (part 1): {strength}");
+    simulate(input, &mut on_cycle1);
 
+    Some(strength)
+}
+
+fn part2(input: &str) -> Option<String> {
     let mut screen = String::new();
 
     let mut on_cycle2 = |x: i32, cycle: i32| {
@@ -28,8 +37,9 @@ pub fn run() {
         }
     };
 
-    simulate(content, &mut on_cycle2);
-    println!("Answer (part 2):\n{}", screen);
+    simulate(input, &mut on_cycle2);
+
+    Some(format!("\n{}", screen))
 }
 
 fn simulate<F>(content: &str, mut on_cycle: F)

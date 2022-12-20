@@ -1,9 +1,15 @@
 use itertools::Itertools;
 
-pub fn run() {
-    let content = include_str!("inputs/04.txt");
+fn main() {
+    println!("Camp Cleanup");
 
-    let num_full_overlaps = content
+    let input = &advent_of_code::read_file("inputs", 4);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<u32> {
+    let num_full_overlaps = input
         .lines()
         .map(read_ranges)
         .map(|(a, b)| -> (Range, Range) {
@@ -18,9 +24,11 @@ pub fn run() {
         })
         .sum::<u32>();
 
-    println!("Answer (part 1): {num_full_overlaps}");
+    Some(num_full_overlaps)
+}
 
-    let num_overlaps = content
+fn part2(input: &str) -> Option<u32> {
+    let num_overlaps = input
         .lines()
         .map(read_ranges)
         .map(|(a, b)| -> (Range, Range) {
@@ -33,7 +41,7 @@ pub fn run() {
         .map(|(leftmost, rightmost)| (rightmost.start <= leftmost.end) as u32)
         .sum::<u32>();
 
-    println!("Answer (part 2): {num_overlaps}");
+    Some(num_overlaps)
 }
 
 struct Range {

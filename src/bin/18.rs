@@ -1,10 +1,20 @@
 use std::collections::{HashSet, VecDeque};
 
-pub fn run() {
-    let content = include_str!("inputs/18.txt");
-    let cubes = parse(content);
-    println!("Answer (Part 1): {}", count_total_surface_area(&cubes));
-    println!("Answer (Part 2): {}", count_exterior_surface_area(&cubes));
+fn main() {
+    println!("Boiling Boulders");
+    let input = &advent_of_code::read_file("inputs", 18);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<usize> {
+    let cubes = parse(input);
+    Some(count_total_surface_area(&cubes))
+}
+
+fn part2(input: &str) -> Option<usize> {
+    let cubes = parse(input);
+    Some(count_exterior_surface_area(&cubes))
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Copy)]

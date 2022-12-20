@@ -1,22 +1,24 @@
-use std::ops::Range;
-
 use itertools::Itertools;
 use regex::Regex;
+use std::ops::Range;
 
-pub fn run() {
-    let content = include_str!("inputs/15.txt");
+fn main() {
+    println!("Beacon Exclusion Zone");
+    let input = &advent_of_code::read_file("inputs", 15);
+    advent_of_code::slow!(|| {
+        advent_of_code::solve!(1, part1, input);
+        advent_of_code::solve!(2, part2, input);
+    });
+}
 
-    let sensors = parse(content);
+fn part1(input: &str) -> Option<usize> {
+    let sensors = parse(input);
+    Some(count_beacon_forbidden(&sensors, 2000000))
+}
 
-    println!(
-        "Answer (Part 1): {}",
-        count_beacon_forbidden(&sensors, 2000000)
-    );
-
-    println!(
-        "Answer (Part 2): {}",
-        find_distress_signal_frequency(&sensors, 4000000)
-    )
+fn part2(input: &str) -> Option<i64> {
+    let sensors = parse(input);
+    Some(find_distress_signal_frequency(&sensors, 4000000))
 }
 
 fn count_beacon_forbidden(sensors: &Vec<Sensor>, y: i64) -> usize {

@@ -1,10 +1,16 @@
 use itertools::Itertools;
 use std::collections::HashSet;
 
-pub fn run() {
-    let content = include_str!("inputs/03.txt");
+fn main() {
+    println!("Rucksack Reorganization");
 
-    let common_sum = content
+    let input = &advent_of_code::read_file("inputs", 3);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<u32> {
+    let common_sum = input
         .lines()
         .flat_map(|line| {
             let (a, b) = line.split_at(line.len() / 2);
@@ -16,9 +22,11 @@ pub fn run() {
         .map(get_priority)
         .sum::<u32>();
 
-    println!("Answer (part 1): {common_sum}");
+    Some(common_sum)
+}
 
-    let badges_sum = content
+fn part2(input: &str) -> Option<u32> {
+    let badges_sum = input
         .lines()
         .map(|line| -> HashSet<char> { HashSet::from_iter(line.chars()) })
         .tuples()
@@ -31,7 +39,7 @@ pub fn run() {
         .map(get_priority)
         .sum::<u32>();
 
-    println!("Answer (part 2): {badges_sum}");
+    Some(badges_sum)
 }
 
 fn get_priority(item_type: char) -> u32 {

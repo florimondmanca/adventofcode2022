@@ -1,10 +1,12 @@
-pub fn run() {
-    let content = include_str!("inputs/02.txt");
-    part1(content);
-    part2(content);
+fn main() {
+    println!("Rock Paper Scissors");
+
+    let input = &advent_of_code::read_file("inputs", 2);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
-fn part1(content: &str) {
+fn part1(input: &str) -> Option<usize> {
     let mut score = 0;
 
     let score_matrix = vec![
@@ -15,7 +17,7 @@ fn part1(content: &str) {
         /* (opponent) */
     ];
 
-    for line in content.lines() {
+    for line in input.lines() {
         // A, B, C -> 0, 1, 2 (rock, paper, scissors)
         let opponent = line.chars().nth(0).unwrap() as usize - ('A' as usize);
 
@@ -28,13 +30,13 @@ fn part1(content: &str) {
         score += outcome_score + player_score;
     }
 
-    println!("Answer (part 1): {}", score);
+    Some(score)
 }
 
-fn part2(content: &str) {
+fn part2(input: &str) -> Option<usize> {
     let mut score = 0;
 
-    for line in content.lines() {
+    for line in input.lines() {
         // A, B, C -> 0, 1, 2 (rock, paper, scissors)
         let opponent = line.chars().nth(0).unwrap() as usize - ('A' as usize);
 
@@ -67,5 +69,5 @@ fn part2(content: &str) {
         score += outcome_score + player_score;
     }
 
-    println!("Answer (part 2): {}", score);
+    Some(score)
 }

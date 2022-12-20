@@ -2,14 +2,38 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub fn run() {
-    let content = include_str!("inputs/07.txt");
+fn main() {
+    println!("No Space Left On Device");
 
-    let root = parse(content);
+    let input = &advent_of_code::read_file("inputs", 7);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<usize> {
+    let root = parse(input);
 
     let mut dirs = vec![Rc::clone(&root)];
 
     let mut total_size_under_100k = 0;
+
+    while let Some(dir) = dirs.pop() {
+        for d in dir.sub_dirs.borrow().values() {
+            dirs.push(Rc::clone(d));
+        }
+        let size = dir.total_size();
+        if size < 100_000 {
+            total_size_under_100k += size;
+        }
+    }
+
+    Some(total_size_under_100k)
+}
+
+fn part2(input: &str) -> Option<usize> {
+    let root = parse(input);
+
+    let mut dirs = vec![Rc::clone(&root)];
 
     let root_size = root.total_size();
     let min_freed_size = 30000000 - (70000000 - root_size);
@@ -20,16 +44,12 @@ pub fn run() {
             dirs.push(Rc::clone(d));
         }
         let size = dir.total_size();
-        if size < 100_000 {
-            total_size_under_100k += size;
-        }
         if size >= min_freed_size && size < smallest_freed_dir_size {
             smallest_freed_dir_size = size;
         }
     }
 
-    println!("Answer (part 1): {total_size_under_100k}");
-    println!("Answer (part 2): {smallest_freed_dir_size}");
+    Some(smallest_freed_dir_size)
 }
 
 struct Directory {

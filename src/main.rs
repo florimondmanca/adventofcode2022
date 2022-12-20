@@ -1,88 +1,33 @@
-mod day01;
-mod day02;
-mod day03;
-mod day04;
-mod day05;
-mod day06;
-mod day07;
-mod day08;
-mod day09;
-mod day10;
-mod day11;
-mod day12;
-mod day13;
-mod day14;
-mod day15;
-mod day16;
-mod day17;
-mod day18;
+use std::{
+    env,
+    process::{self, Command},
+};
 
 fn main() {
-    let slow_enabled = false;
+    (1..19).for_each(|day| {
+        let target = format!("{day:02}");
 
-    title("Day 1: Calories");
-    day01::run();
+        let mut args = vec!["run", "--bin", &target, "--"];
 
-    title("Day 2: Rock Paper Scissors");
-    day02::run();
+        if !env::args().any(|s| s == "--include-slow") {
+            args.push("--skip-slow");
+        }
 
-    title("Day 3: Rucksack Reorganization");
-    day03::run();
+        println!("------");
+        println!("Day {day:02}");
+        println!("------");
 
-    title("Day 4: Camp Cleanup");
-    day04::run();
+        let cmd = Command::new("cargo").args(&args).output().unwrap();
 
-    title("Day 5: Supply Stacks");
-    day05::run();
+        if let Some(code) = cmd.status.code() {
+            if code != 0 {
+                println!("Error: target {target:?} exited with code {code}");
+                println!("{}", &String::from_utf8(cmd.stderr).unwrap());
+                process::exit(1);
+            }
+        }
 
-    title("Day 6: Tuning Trouble");
-    day06::run();
-
-    title("Day 7: No Space Left On Device");
-    day07::run();
-
-    title("Day 8: Treetop Tree House");
-    day08::run();
-
-    title("Day 9: Rope Bridge");
-    day09::run();
-
-    title("Day 10: Cathode-Ray Tube");
-    day10::run();
-
-    title("Day 11: Monkey In The Middle");
-    day11::run();
-
-    title("Day 12: Hill Climbing Algorithm");
-    slow(|| day12::run(), slow_enabled);
-
-    title("Day 13: Distress Signal");
-    day13::run();
-
-    title("Day 14: Regolith Reservoir");
-    slow(|| day14::run(), slow_enabled);
-
-    title("Day 15: Beacon Exclusion Zone");
-    slow(|| day15::run(), slow_enabled);
-
-    title("Day 16: Proboscidea Volcanium");
-    slow(|| day16::run(), slow_enabled);
-
-    title("Day 17: Pyroclastic Flow");
-    slow(|| day17::run(), slow_enabled);
-
-    title("Day 18: Boiling Boulders");
-    day18::run();
-}
-
-fn title(s: &str) {
-    println!("\n{}", s);
-}
-
-fn slow(day: fn() -> (), enabled: bool) {
-    if enabled {
-        day();
-    } else {
-        println!("<skipped: slow>");
-    }
+        let stdout = String::from_utf8(cmd.stdout).unwrap();
+        println!("{stdout}");
+    });
 }

@@ -1,23 +1,35 @@
 use std::{collections::HashSet, ops::Range};
 
-pub fn run() {
-    let content = include_str!("inputs/17.example.txt");
+fn main() {
+    println!("Pyroclastic Flow");
+    part1_example();
+    let input = &advent_of_code::read_file("inputs", 17);
+    advent_of_code::slow!(|| {
+        advent_of_code::solve!(1, part1, input);
+        advent_of_code::solve!(2, part2, input);
+    });
+}
 
-    let jets = parse(content);
+fn part1_example() {
+    println!("Part 1: Example:");
+    let input = &advent_of_code::read_file("examples", 17);
+    let jets = parse(input);
     let shapes = get_shapes();
 
     let mut game = Game::new(0..7, &shapes, &jets);
     game.run(10);
     let rock = game.spawn_rock();
     game.show(&rock);
+}
 
-    let content = include_str!("inputs/17.txt");
-    let jets = parse(content);
+fn part1(input: &str) -> Option<i32> {
+    let shapes = get_shapes();
+    let jets = parse(input);
+    Some(Game::new(0..7, &shapes, &jets).run(2022))
+}
 
-    println!(
-        "Answer (Part 1): {}",
-        Game::new(0..7, &shapes, &jets).run(2022)
-    );
+fn part2(_input: &str) -> Option<u32> {
+    None
 }
 
 fn parse(content: &str) -> Vec<char> {

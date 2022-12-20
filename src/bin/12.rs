@@ -1,30 +1,43 @@
 use std::collections::{HashMap, VecDeque};
 
-pub fn run() {
-    let content = include_str!("inputs/12.txt");
+fn main() {
+    println!("Hill Climbing Algorithm");
+    let input = &advent_of_code::read_file("inputs", 12);
+    advent_of_code::slow!(|| {
+        advent_of_code::solve!(1, part1, input);
+        advent_of_code::solve!(2, part2, input);
+    });
+}
 
+fn part1(input: &str) -> Option<usize> {
     // This is a shortest path finding problem.
     // The height map can be modelled as a graph whose nodes are the
     // locations on the map, and edges are pairs of accessible locations,
     // i.e. adjacent locations whose height difference is at most 1.
     // The map is sufficiently small that we can get away with basic
     // breadth-first search (BFS) algorithm.
-    let (heights, start, end) = parse(content);
+    let (heights, start, end) = parse(input);
     let num_steps = solve(&heights, start, end);
-    println!("Answer (part 1): {num_steps}");
+    Some(num_steps)
+}
 
+fn part2(input: &str) -> Option<usize> {
     // In part 2, we need to find the 'a' location which gives
     // the shortest path to E. Brute force takes a few seconds.
+    let (heights, _, end) = parse(input);
+
     let mut shortest = usize::MAX;
+
     for (node, h) in heights.iter() {
         if *h == 'a' as u32 {
-            let length = solve(&heights, *node, end);
-            if length < shortest {
-                shortest = length;
+            let num_steps = solve(&heights, *node, end);
+            if num_steps < shortest {
+                shortest = num_steps;
             }
         }
     }
-    println!("Answer (part 2): {shortest}");
+
+    Some(shortest)
 }
 
 type Node = (usize, usize);

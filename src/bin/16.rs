@@ -2,18 +2,24 @@
 Credit:
 https://gitlab.com/landreville/advent-of-code-2022/-/blob/master/src/day16.rs
 */
+use regex::Regex;
 use std::{
     cmp::Ordering,
     collections::{BinaryHeap, HashMap, HashSet},
 };
 
-use regex::Regex;
+fn main() {
+    println!("Proboscidea Volcanium");
+    let input = &advent_of_code::read_file("inputs", 16);
+    advent_of_code::slow!(|| {
+        advent_of_code::solve!(1, part1, input);
+        advent_of_code::solve!(2, part2, input);
+    });
+}
 
-pub fn run() {
-    let content = include_str!("inputs/16.txt");
-
+fn part1(input: &str) -> Option<i32> {
     let mut valves = Vec::new();
-    let network = parse(content, &mut valves);
+    let network = parse(input, &mut valves);
     let reach_times = get_reach_times(&network);
 
     let start = *network.keys().find(|&v| v.name == "AA").unwrap();
@@ -31,35 +37,13 @@ pub fn run() {
         start,
         30,
         &vec![start],
-        &Vec::new(),
     );
 
-    println!("Answer (Part 1): {}", path.released_pressure);
+    Some(path.released_pressure)
+}
 
-    let human = find_path(
-        &network,
-        &available_valves,
-        &reach_times,
-        start,
-        26,
-        &vec![start],
-        &Vec::new(),
-    );
-
-    let elephant = find_path(
-        &network,
-        &available_valves,
-        &reach_times,
-        start,
-        26,
-        &vec![start],
-        &human.valves,
-    );
-
-    println!(
-        "Answer (Part 2): {}",
-        human.released_pressure + elephant.released_pressure
-    );
+fn part2(_input: &str) -> Option<i32> {
+    None
 }
 
 struct Path<'a> {
@@ -74,15 +58,10 @@ fn find_path<'a>(
     start: &Valve,
     time_left: i32,
     path: &Vec<&'a Valve>,
-    avoid: &Vec<&'a Valve>,
 ) -> Path<'a> {
     let mut paths: Vec<Path> = Vec::new();
 
     for valve in available_valves {
-        if avoid.contains(valve) {
-            continue;
-        }
-
         let reach_time = reach_times[&start.name][&valve.name];
         if reach_time >= time_left {
             continue;
@@ -110,7 +89,6 @@ fn find_path<'a>(
             valve,
             time_left_after_opening_valve,
             &next_path,
-            avoid,
         );
 
         let mut extended_path = path.clone();

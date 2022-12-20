@@ -1,17 +1,22 @@
+use itertools::Itertools;
 use std::{
     cell::RefCell,
     collections::{HashMap, VecDeque},
 };
 
-use itertools::Itertools;
+fn main() {
+    println!("Monkey in the Middle");
+    let input = &advent_of_code::read_file("inputs", 11);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
 
-pub fn run() {
-    let content = include_str!("inputs/11.txt");
+fn part1(input: &str) -> Option<u128> {
+    let monkeys = parse(input);
+    Some(simulate(&monkeys, 20, |x| x / 3))
+}
 
-    let monkeys = parse(content);
-    println!("Answer (part 1): {}", simulate(&monkeys, 20, |x| x / 3));
-
-    let monkeys = parse(content);
+fn part2(input: &str) -> Option<u128> {
     /*
     Key observation: all divisors in input are the first N prime numbers.
     We only care about 'item mod divisor' and the number of items processed.
@@ -19,16 +24,14 @@ pub fn run() {
     very large, the (fixed) product of the divisors will be eventually become a divisor.
     This means we can process 'item mod <product of divisors>'.
     */
+    let monkeys = parse(input);
     let pod = monkeys.iter().map(|m| m.divisor).product::<u128>();
-    println!(
-        "Answer (part 2): {}",
-        simulate(&monkeys, 10000, |x| x % pod)
-    );
+    Some(simulate(&monkeys, 10000, |x| x % pod))
 }
 
-struct Monkey {
+struct Monkey<'a> {
     items: RefCell<VecDeque<u128>>,
-    operation: Box<dyn Fn(u128) -> u128>,
+    operation: Operation<'a>,
     divisor: u128,
     true_monkey: usize,
     false_monkey: usize,
@@ -48,7 +51,7 @@ where
             inspected.insert(i, inspected.get(&i).unwrap() + num_inspected as u128);
 
             while let Some(worry_level) = monkey.items.borrow_mut().pop_front() {
-                let mut worry_level = (monkey.operation)(worry_level);
+                let mut worry_level = monkey.operation.apply(worry_level);
                 worry_level = relieve(worry_level);
 
                 let target = if worry_level % monkey.divisor == 0 {
@@ -65,8 +68,8 @@ where
     inspected.values().sorted().rev().take(2).product()
 }
 
-fn parse(content: &'static str) -> Vec<Monkey> {
-    content
+fn parse(input: &str) -> Vec<Monkey> {
+    input
         .lines()
         .filter(|line| !line.is_empty() && !line.starts_with("Monkey "))
         .tuples()
@@ -82,7 +85,7 @@ fn parse(content: &'static str) -> Vec<Monkey> {
                         .collect(),
                 );
 
-                let operation = parse_operation(
+                let operation = Operation::from(
                     operation_line
                         .trim()
                         .get("Operation: new = ".len()..)
@@ -129,12 +132,29 @@ fn resolve(token: &str, old: u128) -> u128 {
     }
 }
 
-fn parse_operation(text: &str) -> Box<dyn Fn(u128) -> u128 + '_> {
-    let (left, op, right) = text.split(" ").collect_tuple().unwrap();
+struct Operation<'a> {
+    left: &'a str,
+    right: &'a str,
+    op: &'a str,
+}
 
-    match op {
-        "+" => Box::new(move |old: u128| -> u128 { resolve(left, old) + resolve(right, old) }),
-        "*" => Box::new(move |old: u128| -> u128 { resolve(left, old) * resolve(right, old) }),
-        _ => panic!("unknown operation"),
+impl<'a> Operation<'a> {
+    fn new(left: &'a str, right: &'a str, op: &'a str) -> Self {
+        Self { left, right, op }
+    }
+
+    fn apply(&self, value: u128) -> u128 {
+        match self.op {
+            "+" => resolve(self.left, value) + resolve(self.right, value),
+            "*" => resolve(self.left, value) * resolve(self.right, value),
+            _ => panic!("unknown operation"),
+        }
+    }
+}
+
+impl<'a> From<&'a str> for Operation<'a> {
+    fn from(value: &'a str) -> Self {
+        let (left, op, right) = value.split(" ").collect_tuple().unwrap();
+        Self::new(left, right, op)
     }
 }

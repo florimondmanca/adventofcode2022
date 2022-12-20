@@ -1,26 +1,29 @@
-use std::cmp::Ordering;
-
 use itertools::Itertools;
+use std::cmp::Ordering;
+fn main() {
+    println!("Distress Signal");
+    let input = &advent_of_code::read_file("inputs", 13);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
 
 // Kudos to: https://www.reddit.com/r/adventofcode/comments/zkmyh4/comment/j01mqo7/
 
-pub fn run() {
-    let content = include_str!("inputs/13.txt");
+fn part1(input: &str) -> Option<usize> {
+    let packets = parse(input);
 
-    let mut packets = content
-        .lines()
-        .filter_map(|text| (!text.is_empty()).then(|| parse(text)))
-        .collect::<Vec<Packet>>();
+    let sum = packets
+        .into_iter()
+        .tuples()
+        .enumerate()
+        .filter_map(|(i, (p1, p2))| (p1 <= p2).then(|| i + 1))
+        .sum();
 
-    let mut sum = 0;
+    Some(sum)
+}
 
-    for (i, (p1, p2)) in packets.iter().tuples().enumerate() {
-        if p1 <= p2 {
-            sum += i + 1;
-        }
-    }
-
-    println!("Answer (Part 1): {}", sum);
+fn part2(input: &str) -> Option<usize> {
+    let mut packets = parse(input);
 
     // Insert the dividers, then sort packets.
     let div1 = Packet::List(vec![Packet::List(vec![Packet::Int(2)])]);
@@ -31,9 +34,15 @@ pub fn run() {
 
     let index1 = packets.binary_search(&div1).unwrap() + 1;
     let index2 = packets.binary_search(&div2).unwrap() + 1;
-    let mult = index1 * index2;
 
-    println!("Answer (Part 2): {}", mult);
+    Some(index1 * index2)
+}
+
+fn parse(input: &str) -> Vec<Packet> {
+    input
+        .lines()
+        .filter_map(|text| (!text.is_empty()).then(|| parse_packet(text)))
+        .collect::<Vec<Packet>>()
 }
 
 #[derive(Clone, Eq, PartialEq)]
@@ -70,7 +79,7 @@ impl Ord for Packet {
     }
 }
 
-fn parse(text: &str) -> Packet {
+fn parse_packet(text: &str) -> Packet {
     if text.chars().nth(0).unwrap() == '[' {
         let mut stack_level = 0;
         let left_bracket = 1;
@@ -84,7 +93,7 @@ fn parse(text: &str) -> Packet {
                     //     v  we consume (don't split) the rest of the RHS.
                     // [..., [..., ...]]
                     //       :--------:
-                    //            +-- This is parsed in recursive parse() calls.
+                    //            +-- This is parsed in recursive parse_packet() calls.
                     if c == '[' {
                         stack_level += 1; // push
                     } else if c == ']' {
@@ -93,7 +102,7 @@ fn parse(text: &str) -> Packet {
                     c == ',' && stack_level == 0
                 })
                 .filter(|s| !s.is_empty()) // Maybe '[]'
-                .map(|s| parse(s))
+                .map(|s| parse_packet(s))
                 .collect(),
         )
     } else {

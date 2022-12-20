@@ -1,15 +1,19 @@
 use itertools::Itertools;
 
-pub fn run() {
-    let content = include_str!("inputs/05.txt");
+fn main() {
+    println!("Supply Stacks");
 
-    let mut message;
+    let input = &advent_of_code::read_file("inputs", 5);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
 
-    message = solve(content, apply_crate_mover_9000);
-    println!("Answer (part 1): {message}");
+fn part1(input: &str) -> Option<String> {
+    Some(solve(input, apply_crate_mover_9000))
+}
 
-    message = solve(content, apply_crate_mover_9001);
-    println!("Answer (part 2): {message}");
+fn part2(input: &str) -> Option<String> {
+    Some(solve(input, apply_crate_mover_9001))
 }
 
 type Stacks = Vec<Vec<char>>;

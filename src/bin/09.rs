@@ -1,16 +1,24 @@
+use itertools::Itertools;
 use std::collections::HashSet;
 
-use itertools::Itertools;
+fn main() {
+    println!("Rope Bridge");
 
-pub fn run() {
-    let content = include_str!("inputs/09.txt");
-    let moves = parse(content);
+    let input = &advent_of_code::read_file("inputs", 9);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
 
+fn part1(input: &str) -> Option<usize> {
+    let moves = parse(input);
     let rope = vec![(0, 0), (0, 0)];
-    println!("Answer (part 1): {}", solve(rope.clone(), &moves));
+    Some(solve(rope.clone(), &moves))
+}
 
+fn part2(input: &str) -> Option<usize> {
+    let moves = parse(input);
     let rope = (0..10).map(|_| (0, 0)).collect::<Vec<Knot>>();
-    println!("Answer (part 2): {}", solve(rope.clone(), &moves));
+    Some(solve(rope.clone(), &moves))
 }
 
 fn solve(mut rope: Rope, moves: &Vec<Move>) -> usize {
@@ -31,8 +39,8 @@ type Knot = (i32, i32);
 type Rope = Vec<Knot>;
 type Move = (String, u32);
 
-fn parse(content: &str) -> Vec<Move> {
-    content
+fn parse(input: &str) -> Vec<Move> {
+    input
         .lines()
         .map(|line| {
             let (direction, quantity) = line.split(" ").collect_tuple().unwrap();

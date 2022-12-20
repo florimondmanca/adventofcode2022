@@ -1,16 +1,23 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
-
 use take_until::TakeUntilExt;
 
-pub fn run() {
-    let content = include_str!("inputs/08.txt");
-    let grid = parse(content);
-    let count = count_visible(&grid);
-    println!("Answer (part 1): {count}");
+fn main() {
+    println!("Treetop Tree House");
 
-    let score = maximize_scenic_score(&grid);
-    println!("Answer (part 2): {score}");
+    let input = &advent_of_code::read_file("inputs", 8);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
+fn part1(input: &str) -> Option<u32> {
+    let grid = parse(input);
+    Some(count_visible(&grid))
+}
+
+fn part2(input: &str) -> Option<u32> {
+    let grid = parse(input);
+    Some(maximize_scenic_score(&grid))
 }
 
 type GridMap = HashMap<(usize, usize), u32>;
