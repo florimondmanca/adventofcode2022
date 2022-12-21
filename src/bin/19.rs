@@ -12,8 +12,10 @@ fn main() {
     println!("Not Enough Minerals");
     // Kudos to: https://todd.ginsberg.com/post/advent-of-code/2022/day19/
     let input = &advent_of_code::read_file("inputs", 19);
-    advent_of_code::solve!(1, part1, input);
-    advent_of_code::solve!(2, part2, input);
+    advent_of_code::slow!(|| {
+        advent_of_code::solve!(1, part1, input);
+        advent_of_code::solve!(2, part2, input);
+    });
 }
 
 fn part1(input: &str) -> Option<i32> {

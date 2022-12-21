@@ -4,7 +4,7 @@ use std::{
 };
 
 fn main() {
-    (19..20).for_each(|day| {
+    (1..=20).for_each(|day| {
         let target = format!("{day:02}");
 
         let mut args = vec!["run", "--bin", &target, "--"];
@@ -29,7 +29,10 @@ fn main() {
         };
 
         println!("Stdout:\n{}", &String::from_utf8(cmd.stdout).unwrap());
-        println!("Stderr:\n{}", &String::from_utf8(cmd.stderr).unwrap());
-        process::exit(exit_code);
+
+        if exit_code > 0 {
+            println!("Stderr:\n{}", &String::from_utf8(cmd.stderr).unwrap());
+            process::exit(exit_code);
+        }
     });
 }
