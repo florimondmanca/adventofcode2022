@@ -1,7 +1,9 @@
-use std::io::{stdout, Write};
+use std::io::{stdout, StdoutLock, Write};
 
 use itertools::Itertools;
 use regex::Regex;
+
+const RESOURCE_TYPES: [&str; 4] = ["ore", "clay", "obsidian", "geode"];
 
 fn main() {
     println!("Not Enough Minerals");
@@ -40,28 +42,29 @@ fn part1(input: &str) -> Option<u32> {
      *      R_0 = (1 0 0 0).T
      *      (Initially, we have 1 ore-collecting robot.)
      *
-     * Let X_n = (x_n, y_n, z_n, w_n) be the 4-vector of the available resources at minute n.
+     * Let X_n be the 4-vector of the available resources at minute n.
      * Then:
      *      X_0 is (0 0 0 0).T
      *      (Initially, we have no spare resources.)
      *
-     * Finally, let B_n = (a_n, b_n, c_n, d_n) be the number of robots
-     * of each type we decide to build at minute n.
-     * Then:
-     *      0 <= B_n < X_n
+     * Let B_n be the 4-vector describing which robot, if any, we build at minute n.
+     * Each element in B_n is either 1 (build) or 0 (don't build).
+     * The fact that we may only build 1 robot at a time can be translated as:
+     *      ||B_n||_1 <= 1
+     *      (At most 1 element is 1, with the rest being 0.)
+     * The fact that we may only build a robot if we have enough resources can be translated as:
+     *      Q * B_n <= X_n (element-wise)
      *
-     * Then:
-     *      R_{n+1} = R_n + B_n
-     *      X_{n+1} = X_n + Y * R_n - Q * B_n
+     * The iteration schema is then as follows:
+     *      X_{n+1} = X_n + Y * R_n - Q * B_{n+1}
+     *      R_{n+1} = R_n + B_{n+1}
      *
-     * The optimal sequence of robot manufacturing for a blueprint defined by the
-     * requirements matrix Q is the one that maximizes the number of geodes at minute 24, i.e.:
-     *      B°(Q) = argmax_{B = [B_0, B_1, ..., B_24]} w_24
+     * For a given blueprint, the optimal build sequence B° is the one
+     * that maximizes the number of geodes after 24 minutes, i.e.:
+     *      B°(Q) = argmax_{B among the set of possible build sequences} X_n_4
      *
      * The answer is the sum of ID * B° for each blueprint.
      */
-    println!();
-
     let blueprints = parse(input);
 
     let mut quality_sum = 0;
@@ -79,11 +82,21 @@ fn part2(_input: &str) -> Option<u32> {
 }
 
 fn maximize_geodes(blueprint: &Blueprint) -> u32 {
-    // When should we build robots? (This is a backtracking problem.)
-    // At each step, there is a set of buildable robots, as defined by
-    // those for which we have enough resources.
-    // Assume this set is of size N (N may be 0 up to 4).
-    // Then at each step we have N + 1 choices: build one of the N robots, or build none.
+    /*
+    When should we build robots? This is a backtracking problem.
+
+    At each step, the amount of available resources defines the set of buildable robot types.
+    Assume this set is of size N, which can be 0, 1, 2, 3 or 4.
+
+    Then at each step we must decide among N + 1 possibilities:
+    * Build one of the N robots (N branches);
+    * Build none.
+
+    For a number of minutes M, a brute force approach would then have
+    a complexity of O(4^M). This is of course ridiculous and not even worth trying.
+    (24 minutes may be manageable, but part 2 will probably want us to solve this problem
+    for a much larger number of minutes. So we must be smarter than brute force.)
+     */
     let mut build_seq = Vec::new();
 
     for minute in 1..=24 {
@@ -107,75 +120,97 @@ fn maximize_geodes(blueprint: &Blueprint) -> u32 {
     simulate(blueprint, build_seq)
 }
 
-fn simulate(blueprint: &Blueprint, build_seq: Vec<[u32; 4]>) -> u32 {
-    println!("+--------------+");
-    println!("| Blueprint {:02} |", blueprint.id);
-    println!("+--------------+");
-    println!();
+type Vec4 = [u32; 4];
+type Build = Vec4;
+type Step = (Vec4, Vec4);
 
-    let resource_types = ["ore", "clay", "obsidian", "geode"];
+fn simulate(blueprint: &Blueprint, build_seq: Vec<Build>) -> u32 {
+    Simulation::new(blueprint, build_seq).run()
+}
 
-    let mut steps = vec![([0, 0, 0, 0], [1, 0, 0, 0])];
+struct Simulation<'a> {
+    blueprint: &'a Blueprint,
+    build_seq: Vec<Build>,
+    steps: Vec<Step>,
+}
 
-    for (index, &build) in build_seq.iter().enumerate() {
-        let minute = index + 1;
+impl<'a> Simulation<'a> {
+    fn new(blueprint: &'a Blueprint, build_seq: Vec<Build>) -> Self {
+        let steps = vec![
+            // Initially...
+            (
+                [0, 0, 0, 0], // No resources
+                [1, 0, 0, 0], // 1 ore-collecting robot
+            ),
+        ];
 
-        // Lock stdout for the entire iteration, rather locking it
-        // each print!() during this hot loop.
-        let mut out = stdout().lock();
-
-        writeln!(out, "== Minute {} ==", minute).unwrap();
-        let (resources_nprev, robots_nprev) = steps[minute - 1];
-
-        let mut resources_n = resources_nprev.clone();
-        let mut robots_n = robots_nprev.clone();
-        let mut in_the_making = [0, 0, 0, 0];
-
-        for (dim, &resource_type) in resource_types.iter().enumerate() {
-            match build[dim] {
-                0 => {}
-                1 => {
-                    let req = blueprint.requirements[dim];
-
-                    writeln!(
-                        out,
-                        "Spend {spending} to start building a {resource}-collecting robot.",
-                        spending = req
-                            .clone()
-                            .iter()
-                            .zip(resource_types)
-                            .filter(|(&amount, _)| amount > 0)
-                            .map(|(amount, resource)| format!("{amount} {resource}"))
-                            .join(", "),
-                        resource = resource_type
-                    )
-                    .unwrap();
-
-                    for (j, amount) in req.iter().enumerate() {
-                        resources_n[j] -= amount;
-                    }
-
-                    in_the_making[dim] += 1;
-                }
-                _ => panic!("Illegal number of robots to build: {}", build[dim]),
-            }
+        Self {
+            blueprint,
+            build_seq,
+            steps,
         }
+    }
 
-        for (dim, &resource_type) in resource_types.iter().enumerate() {
-            if robots_nprev[dim] > 0 {
+    fn maybe_start_building_a_robot(
+        &self,
+        out: &mut StdoutLock,
+        build: Build,
+        resources_next: &mut Vec4,
+        robots_in_the_making: &mut Vec4,
+    ) {
+        RESOURCE_TYPES
+            .iter()
+            .enumerate()
+            .filter(|(dim, _)| build[*dim] == 1)
+            .for_each(|(dim, &resource_type)| {
+                let robot_requirements = self.blueprint.requirements[dim];
+
+                writeln!(
+                    out,
+                    "Spend {spending} to start building a {resource}-collecting robot.",
+                    spending = robot_requirements
+                        .clone()
+                        .iter()
+                        .zip(RESOURCE_TYPES)
+                        .filter(|(&amount, _)| amount > 0)
+                        .map(|(amount, resource)| format!("{amount} {resource}"))
+                        .join(", "),
+                    resource = resource_type
+                )
+                .unwrap();
+
+                for (i, amount) in robot_requirements.iter().enumerate() {
+                    resources_next[i] -= amount;
+                }
+
+                robots_in_the_making[dim] += 1;
+            });
+    }
+
+    fn collect_resources_with_existing_robots(
+        &self,
+        out: &mut StdoutLock,
+        robots_prev: Vec4,
+        resources_next: &mut Vec4,
+    ) {
+        RESOURCE_TYPES
+            .iter()
+            .enumerate()
+            .filter(|(dim, _)| robots_prev[*dim] > 0)
+            .for_each(|(dim, &resource_type)| {
                 write!(
                     out,
                     "{num} {resource}-{actioning} {robots} {action} {num} {resources}; ",
-                    num = robots_nprev[dim],
+                    num = robots_prev[dim],
                     resource = resource_type,
                     actioning = match resource_type {
                         "geode" => "breaking",
                         _ => "collecting",
                     },
-                    robots = pluralize(robots_nprev[dim], "robot", "robots"),
+                    robots = pluralize(robots_prev[dim], "robot", "robots"),
                     action = match resource_type {
-                        "geode" => pluralize(robots_nprev[dim], "cracks", "crack"),
-                        _ => pluralize(robots_nprev[dim], "collects", "collect"),
+                        "geode" => pluralize(robots_prev[dim], "cracks", "crack"),
+                        _ => pluralize(robots_prev[dim], "collects", "collect"),
                     },
                     resources = match resource_type {
                         "geode" => "geodes",
@@ -184,43 +219,88 @@ fn simulate(blueprint: &Blueprint, build_seq: Vec<[u32; 4]>) -> u32 {
                 )
                 .unwrap();
 
-                resources_n[dim] += robots_nprev[dim];
+                resources_next[dim] += robots_prev[dim];
 
                 writeln!(
                     out,
                     "you now have {num} {resource}.",
-                    num = resources_n[dim],
+                    num = resources_next[dim],
                     resource = match resource_type {
-                        "geode" => pluralize(resources_n[dim], "open geode", "open geodes"),
+                        "geode" => pluralize(resources_next[dim], "open geode", "open geodes"),
                         t => t,
                     }
                 )
                 .unwrap();
-            }
+            });
+    }
 
-            if in_the_making[dim] > 0 {
-                robots_n[dim] += in_the_making[dim];
+    fn finish_building_any_new_robot(
+        &self,
+        out: &mut StdoutLock,
+        robots_in_the_making: Vec4,
+        robots_next: &mut Vec4,
+    ) {
+        RESOURCE_TYPES
+            .iter()
+            .enumerate()
+            .filter(|(dim, _)| robots_in_the_making[*dim] > 0)
+            .for_each(|(dim, &resource_type)| {
+                robots_next[dim] += robots_in_the_making[dim];
                 writeln!(
                     out,
                     "The new {resource}-collecting robot is ready; you now have {num} of them.",
-                    resource = resource_types[dim],
-                    num = robots_n[dim]
+                    resource = resource_type,
+                    num = robots_next[dim]
                 )
                 .unwrap();
-            }
-        }
-
-        println!();
-
-        steps.push((resources_n, robots_n));
+            });
     }
 
-    let (resources_final, _) = steps.last().unwrap();
+    fn advance(&self, out: &mut StdoutLock, minute: usize, build: Build) -> Step {
+        writeln!(out, "== Minute {} ==", minute).unwrap();
+        let (resources_prev, robots_prev) = self.steps[minute - 1];
 
-    resources_final[3]
+        let mut resources_next = resources_prev.clone();
+        let mut robots_next = robots_prev.clone();
+        let mut robots_in_the_making = [0, 0, 0, 0];
+
+        self.maybe_start_building_a_robot(
+            out,
+            build,
+            &mut resources_next,
+            &mut robots_in_the_making,
+        );
+        self.collect_resources_with_existing_robots(out, robots_prev, &mut resources_next);
+        self.finish_building_any_new_robot(out, robots_in_the_making, &mut robots_next);
+
+        writeln!(out).unwrap();
+
+        (resources_next, robots_next)
+    }
+
+    fn run(&mut self) -> u32 {
+        println!();
+        println!("+--------------+");
+        println!("| Blueprint {:02} |", self.blueprint.id);
+        println!("+--------------+");
+        println!();
+
+        for (index, &build) in self.build_seq.iter().enumerate() {
+            // Lock stdout for the entire iteration, rather locking it
+            // each print!() during this hot loop.
+            let mut out = stdout().lock();
+            let minute = index + 1;
+            let step = self.advance(&mut out, minute, build);
+            self.steps.push(step);
+        }
+
+        let (resources_final, _) = self.steps.last().unwrap();
+
+        resources_final[3]
+    }
 }
 
-type RequirementsMatrix = [[u32; 4]; 4];
+type RequirementsMatrix = [Vec4; 4];
 
 struct Blueprint {
     id: u32,
@@ -243,7 +323,7 @@ fn parse(input: &str) -> Vec<Blueprint> {
 
             let id = cap[1].parse().unwrap();
 
-            let requirements = [
+            let requirements: RequirementsMatrix = [
                 [cap[2].parse().unwrap(), 0, 0, 0],
                 [cap[3].parse().unwrap(), 0, 0, 0],
                 [cap[4].parse().unwrap(), cap[5].parse().unwrap(), 0, 0],
