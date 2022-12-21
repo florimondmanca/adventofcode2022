@@ -10,6 +10,7 @@ const RESOURCES: RangeInclusive<usize> = ORE..=GEODE;
 
 fn main() {
     println!("Not Enough Minerals");
+    // Kudos to: https://todd.ginsberg.com/post/advent-of-code/2022/day19/
     let input = &advent_of_code::read_file("inputs", 19);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -26,13 +27,22 @@ fn part1(input: &str) -> Option<i32> {
     Some(quality_levels.into_iter().sum())
 }
 
-fn part2(_input: &str) -> Option<u32> {
-    None
+fn part2(input: &str) -> Option<i32> {
+    let blueprints = parse(input);
+
+    let max_geodes = blueprints
+        .into_iter()
+        .take(3)
+        .map(|blueprint| maximize_geodes(&blueprint, 32))
+        .collect::<Vec<_>>();
+
+    Some(max_geodes.into_iter().product())
 }
 
 fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
-    // Perform a depth-first search of the set of states,
-    // using the number of found geodes as the priority.
+    // Perform a depth-first search on the set of possible states,
+    // using the number of geodes as the heuristic,
+    // skipping states for which we cannot ever beat the best amount we found so far.
     let mut max_geodes = 0;
     let mut queue = BinaryHeap::new();
 
@@ -40,6 +50,10 @@ fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
     queue.push(initial.clone());
 
     while let Some(state) = queue.pop() {
+        if !state.can_beat(max_geodes, max_time) {
+            continue;
+        }
+
         for other in state.get_next_states(blueprint, max_time) {
             queue.push(other);
         }
@@ -98,6 +112,12 @@ impl State {
             .into_iter()
             .filter(|s| s.time <= max_time)
             .collect()
+    }
+
+    fn can_beat(&self, best_so_far: i32, max_time: i32) -> bool {
+        let time_left = max_time - self.time;
+        let potential_geodes = (0..time_left).map(|n| n + self.robots[GEODE]).sum::<i32>();
+        self.resources[GEODE] + potential_geodes > best_so_far
     }
 }
 
