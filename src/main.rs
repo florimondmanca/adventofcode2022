@@ -19,16 +19,17 @@ fn main() {
 
         let cmd = Command::new("cargo").args(&args).output().unwrap();
 
-        if let Some(code) = cmd.status.code() {
-            if code != 0 {
+        let exit_code = match cmd.status.code() {
+            Some(0) => 0,
+            Some(code) => {
                 println!("Error: target {target:?} exited with code {code}");
-                println!("Stdout: {}", &String::from_utf8(cmd.stdout).unwrap());
-                println!("Stderr: {}", &String::from_utf8(cmd.stderr).unwrap());
-                process::exit(1);
-            }
-        }
+                1
+            },
+            None => panic!()
+        };
 
-        let stdout = String::from_utf8(cmd.stdout).unwrap();
-        println!("{stdout}");
+        println!("Stdout:\n{}", &String::from_utf8(cmd.stdout).unwrap());
+        println!("Stderr:\n{}", &String::from_utf8(cmd.stderr).unwrap());
+        process::exit(exit_code);
     });
 }

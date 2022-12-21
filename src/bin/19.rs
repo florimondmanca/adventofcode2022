@@ -1,18 +1,15 @@
-use std::io::{stdout, StdoutLock, Write};
+use std::{cmp::Ordering, collections::BinaryHeap};
 
-use itertools::Itertools;
 use regex::Regex;
-
-const RESOURCE_TYPES: [&str; 4] = ["ore", "clay", "obsidian", "geode"];
 
 fn main() {
     println!("Not Enough Minerals");
-    let input = &advent_of_code::read_file("examples", 19);
+    let input = &advent_of_code::read_file("inputs", 19);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
 }
 
-fn part1(input: &str) -> Option<u32> {
+fn part1(input: &str) -> Option<i32> {
     /*
      * Let Q be the 4x4 matrix representing the resource requirements
      * for building each type of robot.
@@ -67,278 +64,289 @@ fn part1(input: &str) -> Option<u32> {
      */
     let blueprints = parse(input);
 
-    let mut quality_sum = 0;
+    let quality_levels = blueprints
+        .into_iter()
+        .map(|blueprint| blueprint.id * maximize_geodes(&blueprint, 24))
+        .collect::<Vec<_>>();
 
-    for blueprint in blueprints {
-        let max_num_geodes = maximize_geodes(&blueprint);
-        quality_sum += blueprint.id * max_num_geodes;
-    }
-
-    Some(quality_sum)
+    Some(quality_levels.into_iter().sum())
 }
 
 fn part2(_input: &str) -> Option<u32> {
     None
 }
 
-fn maximize_geodes(blueprint: &Blueprint) -> u32 {
-    /*
-    When should we build robots? This is a backtracking problem.
+fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
+    let mut max_geodes = 0;
+    let mut queue = BinaryHeap::new();
 
-    At each step, the amount of available resources defines the set of buildable robot types.
-    Assume this set is of size N, which can be 0, 1, 2, 3 or 4.
+    let initial = State::new();
+    queue.push(initial.clone());
 
-    Then at each step we must decide among N + 1 possibilities:
-    * Build one of the N robots (N branches);
-    * Build none.
+    while let Some(state) = queue.pop() {
+        for other in state.get_next_states(blueprint, max_time) {
+            queue.push(other);
+        }
 
-    For a number of minutes M, a brute force approach would then have
-    a complexity of O(4^M). This is of course ridiculous and not even worth trying.
-    (24 minutes may be manageable, but part 2 will probably want us to solve this problem
-    for a much larger number of minutes. So we must be smarter than brute force.)
-     */
-    let mut build_seq = Vec::new();
+        max_geodes = max_geodes.max(state.geodes);
+    }
 
-    for minute in 1..=24 {
-        if blueprint.id == 1 {
-            build_seq.push(match minute {
-                3 => [0, 1, 0, 0],
-                5 => [0, 1, 0, 0],
-                7 => [0, 1, 0, 0],
-                11 => [0, 0, 1, 0],
-                12 => [0, 1, 0, 0],
-                15 => [0, 0, 1, 0],
-                18 => [0, 0, 0, 1],
-                21 => [0, 0, 0, 1],
-                _ => [0, 0, 0, 0],
-            });
-        } else {
-            build_seq.push([0, 0, 0, 0]);
+    max_geodes
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+struct State {
+    time: i32,
+    ore_robots: i32,
+    ore: i32,
+    clay_robots: i32,
+    clay: i32,
+    obsidian_robots: i32,
+    obsidian: i32,
+    geode_robots: i32,
+    geodes: i32,
+}
+
+impl State {
+    fn new() -> Self {
+        Self {
+            time: 1,
+            ore_robots: 1,
+            ore: 1,
+            clay_robots: 0,
+            clay: 0,
+            obsidian_robots: 0,
+            obsidian: 0,
+            geode_robots: 0,
+            geodes: 0,
         }
     }
 
-    simulate(blueprint, build_seq)
+    fn get_next_states(&self, blueprint: &Blueprint, max_time: i32) -> Vec<State> {
+        if self.time >= max_time {
+            return Vec::new();
+        }
+
+        /*
+        We try building a robot if we have enough resources, and we don't have
+        enough robots yet to cover the maximum amount of resources required to
+        build any other kind of robot (except for geode robots: build as many of
+        those as possible).
+        */
+
+        let mut next_states = Vec::new();
+
+        if self.ore > 0 && self.ore_robots < blueprint.max_ore_cost {
+            next_states.push(blueprint.ore_robot.schedule_build(&self));
+        }
+
+        if self.ore > 0 && self.clay_robots < blueprint.max_clay_cost {
+            next_states.push(blueprint.clay_robot.schedule_build(&self));
+        }
+
+        if self.ore > 0 && self.clay > 0 && self.obsidian_robots < blueprint.max_obsidian_cost {
+            next_states.push(blueprint.obsidian_robot.schedule_build(&self));
+        }
+
+        if self.ore > 0 && self.obsidian > 0 {
+            next_states.push(blueprint.geode_robot.schedule_build(&self));
+        }
+
+        next_states
+            .into_iter()
+            .filter(|s| s.time <= max_time)
+            .collect()
+    }
 }
 
-type Vec4 = [u32; 4];
-type Build = Vec4;
-type Step = (Vec4, Vec4);
-
-fn simulate(blueprint: &Blueprint, build_seq: Vec<Build>) -> u32 {
-    Simulation::new(blueprint, build_seq).run()
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
 }
 
-struct Simulation<'a> {
-    blueprint: &'a Blueprint,
-    build_seq: Vec<Build>,
-    steps: Vec<Step>,
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.geodes.cmp(&other.geodes)
+    }
 }
 
-impl<'a> Simulation<'a> {
-    fn new(blueprint: &'a Blueprint, build_seq: Vec<Build>) -> Self {
-        let steps = vec![
-            // Initially...
-            (
-                [0, 0, 0, 0], // No resources
-                [1, 0, 0, 0], // 1 ore-collecting robot
-            ),
-        ];
+#[derive(Debug)]
+struct RobotBlueprint {
+    ore_robots_built: i32,
+    clay_robots_built: i32,
+    obsidian_robots_built: i32,
+    geode_robots_built: i32,
+    ore_cost: i32,
+    clay_cost: i32,
+    obsidian_cost: i32,
+}
+
+impl RobotBlueprint {
+    fn new(
+        ore_robots_built: i32,
+        clay_robots_built: i32,
+        obsidian_robots_built: i32,
+        geode_robots_built: i32,
+        ore_cost: i32,
+        clay_cost: i32,
+        obsidian_cost: i32,
+    ) -> Self {
+        Self {
+            ore_robots_built,
+            clay_robots_built,
+            obsidian_robots_built,
+            geode_robots_built,
+            ore_cost,
+            clay_cost,
+            obsidian_cost,
+        }
+    }
+
+    fn time_until_build(&self, state: &State) -> i32 {
+        /*
+        We look for the amount of time t to wait until:
+            resource_cost = resource + t * resource_robots
+
+        Rearranging, this gives:
+            t = 1 + (resource_cost - resource) // resource_robots
+        */
+
+        fn comp(cost: i32, amount: i32, robots: i32) -> i32 {
+            ((cost as f32 - amount as f32) / (robots as f32)).ceil() as i32
+        }
+
+        [
+            if state.ore >= self.ore_cost {
+                1
+            } else {
+                1 + comp(self.ore_cost, state.ore, state.ore_robots)
+            },
+            if state.clay >= self.clay_cost {
+                1
+            } else {
+                1 + comp(self.clay_cost, state.clay, state.clay_robots)
+            },
+            if state.obsidian >= self.obsidian_cost {
+                1
+            } else {
+                1 + comp(self.obsidian_cost, state.obsidian, state.obsidian_robots)
+            },
+        ]
+        .into_iter()
+        .max()
+        .unwrap()
+    }
+
+    fn schedule_build(&self, state: &State) -> State {
+        // How long until we can build this robot from this state?
+        let time_required = self.time_until_build(&state);
+
+        // Generate a state that will build this robot at that time,
+        // and pick up new materials in the meantime.
+
+        let mut next_state = state.clone();
+
+        next_state.time = state.time + time_required;
+
+        next_state.ore_robots = state.ore_robots + self.ore_robots_built;
+        next_state.ore = state.ore - self.ore_cost + time_required * state.ore_robots;
+
+        next_state.clay_robots = state.clay_robots + self.clay_robots_built;
+        next_state.clay = state.clay - self.clay_cost + time_required * state.clay_robots;
+
+        next_state.obsidian_robots = state.obsidian_robots + self.obsidian_robots_built;
+        next_state.obsidian =
+            state.obsidian - self.obsidian_cost + time_required * state.obsidian_robots;
+
+        next_state.geode_robots = state.geode_robots + self.geode_robots_built;
+        next_state.geodes = state.geodes + time_required * state.geode_robots;
+
+        next_state
+    }
+}
+
+#[derive(Debug)]
+struct Blueprint {
+    id: i32,
+    ore_robot: RobotBlueprint,
+    clay_robot: RobotBlueprint,
+    obsidian_robot: RobotBlueprint,
+    geode_robot: RobotBlueprint,
+    max_ore_cost: i32,
+    max_clay_cost: i32,
+    max_obsidian_cost: i32,
+}
+
+impl From<&str> for Blueprint {
+    fn from(line: &str) -> Self {
+        let re = Regex::new(r"Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.").unwrap();
+        let cap = re.captures(line).unwrap();
+
+        let ore_robot = RobotBlueprint::new(1, 0, 0, 0, cap[2].parse().unwrap(), 0, 0);
+        let clay_robot = RobotBlueprint::new(0, 1, 0, 0, cap[3].parse().unwrap(), 0, 0);
+        let obsidian_robot = RobotBlueprint::new(
+            0,
+            0,
+            1,
+            0,
+            cap[4].parse().unwrap(),
+            cap[5].parse().unwrap(),
+            0,
+        );
+        let geode_robot = RobotBlueprint::new(
+            0,
+            0,
+            0,
+            1,
+            cap[6].parse().unwrap(),
+            0,
+            cap[7].parse().unwrap(),
+        );
+
+        let max_ore_cost = [
+            ore_robot.ore_cost,
+            clay_robot.ore_cost,
+            obsidian_robot.ore_cost,
+            geode_robot.ore_cost,
+        ]
+        .into_iter()
+        .max()
+        .unwrap();
+
+        let max_clay_cost = [
+            ore_robot.clay_cost,
+            clay_robot.clay_cost,
+            obsidian_robot.clay_cost,
+            geode_robot.clay_cost,
+        ]
+        .into_iter()
+        .max()
+        .unwrap();
+
+        let max_obsidian_cost = [
+            ore_robot.obsidian_cost,
+            clay_robot.obsidian_cost,
+            obsidian_robot.obsidian_cost,
+            geode_robot.obsidian_cost,
+        ]
+        .into_iter()
+        .max()
+        .unwrap();
 
         Self {
-            blueprint,
-            build_seq,
-            steps,
+            id: cap[1].parse().unwrap(),
+            ore_robot,
+            clay_robot,
+            obsidian_robot,
+            geode_robot,
+            max_ore_cost,
+            max_clay_cost,
+            max_obsidian_cost,
         }
-    }
-
-    fn maybe_start_building_a_robot(
-        &self,
-        out: &mut StdoutLock,
-        build: Build,
-        resources_next: &mut Vec4,
-        robots_in_the_making: &mut Vec4,
-    ) {
-        RESOURCE_TYPES
-            .iter()
-            .enumerate()
-            .filter(|(dim, _)| build[*dim] == 1)
-            .for_each(|(dim, &resource_type)| {
-                let robot_requirements = self.blueprint.requirements[dim];
-
-                writeln!(
-                    out,
-                    "Spend {spending} to start building a {resource}-collecting robot.",
-                    spending = robot_requirements
-                        .clone()
-                        .iter()
-                        .zip(RESOURCE_TYPES)
-                        .filter(|(&amount, _)| amount > 0)
-                        .map(|(amount, resource)| format!("{amount} {resource}"))
-                        .join(", "),
-                    resource = resource_type
-                )
-                .unwrap();
-
-                for (i, amount) in robot_requirements.iter().enumerate() {
-                    resources_next[i] -= amount;
-                }
-
-                robots_in_the_making[dim] += 1;
-            });
-    }
-
-    fn collect_resources_with_existing_robots(
-        &self,
-        out: &mut StdoutLock,
-        robots_prev: Vec4,
-        resources_next: &mut Vec4,
-    ) {
-        RESOURCE_TYPES
-            .iter()
-            .enumerate()
-            .filter(|(dim, _)| robots_prev[*dim] > 0)
-            .for_each(|(dim, &resource_type)| {
-                write!(
-                    out,
-                    "{num} {resource}-{actioning} {robots} {action} {num} {resources}; ",
-                    num = robots_prev[dim],
-                    resource = resource_type,
-                    actioning = match resource_type {
-                        "geode" => "breaking",
-                        _ => "collecting",
-                    },
-                    robots = pluralize(robots_prev[dim], "robot", "robots"),
-                    action = match resource_type {
-                        "geode" => pluralize(robots_prev[dim], "cracks", "crack"),
-                        _ => pluralize(robots_prev[dim], "collects", "collect"),
-                    },
-                    resources = match resource_type {
-                        "geode" => "geodes",
-                        t => t,
-                    },
-                )
-                .unwrap();
-
-                resources_next[dim] += robots_prev[dim];
-
-                writeln!(
-                    out,
-                    "you now have {num} {resource}.",
-                    num = resources_next[dim],
-                    resource = match resource_type {
-                        "geode" => pluralize(resources_next[dim], "open geode", "open geodes"),
-                        t => t,
-                    }
-                )
-                .unwrap();
-            });
-    }
-
-    fn finish_building_any_new_robot(
-        &self,
-        out: &mut StdoutLock,
-        robots_in_the_making: Vec4,
-        robots_next: &mut Vec4,
-    ) {
-        RESOURCE_TYPES
-            .iter()
-            .enumerate()
-            .filter(|(dim, _)| robots_in_the_making[*dim] > 0)
-            .for_each(|(dim, &resource_type)| {
-                robots_next[dim] += robots_in_the_making[dim];
-                writeln!(
-                    out,
-                    "The new {resource}-collecting robot is ready; you now have {num} of them.",
-                    resource = resource_type,
-                    num = robots_next[dim]
-                )
-                .unwrap();
-            });
-    }
-
-    fn advance(&self, out: &mut StdoutLock, minute: usize, build: Build) -> Step {
-        writeln!(out, "== Minute {} ==", minute).unwrap();
-        let (resources_prev, robots_prev) = self.steps[minute - 1];
-
-        let mut resources_next = resources_prev.clone();
-        let mut robots_next = robots_prev.clone();
-        let mut robots_in_the_making = [0, 0, 0, 0];
-
-        self.maybe_start_building_a_robot(
-            out,
-            build,
-            &mut resources_next,
-            &mut robots_in_the_making,
-        );
-        self.collect_resources_with_existing_robots(out, robots_prev, &mut resources_next);
-        self.finish_building_any_new_robot(out, robots_in_the_making, &mut robots_next);
-
-        writeln!(out).unwrap();
-
-        (resources_next, robots_next)
-    }
-
-    fn run(&mut self) -> u32 {
-        println!();
-        println!("+--------------+");
-        println!("| Blueprint {:02} |", self.blueprint.id);
-        println!("+--------------+");
-        println!();
-
-        for (index, &build) in self.build_seq.iter().enumerate() {
-            // Lock stdout for the entire iteration, rather locking it
-            // each print!() during this hot loop.
-            let mut out = stdout().lock();
-            let minute = index + 1;
-            let step = self.advance(&mut out, minute, build);
-            self.steps.push(step);
-        }
-
-        let (resources_final, _) = self.steps.last().unwrap();
-
-        resources_final[3]
-    }
-}
-
-type RequirementsMatrix = [Vec4; 4];
-
-struct Blueprint {
-    id: u32,
-    requirements: RequirementsMatrix,
-}
-
-impl Blueprint {
-    fn new(id: u32, requirements: RequirementsMatrix) -> Self {
-        Self { id, requirements }
     }
 }
 
 fn parse(input: &str) -> Vec<Blueprint> {
-    let re = Regex::new(r"Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.").unwrap();
-
-    input
-        .lines()
-        .map(|line| {
-            let cap = re.captures(line).unwrap();
-
-            let id = cap[1].parse().unwrap();
-
-            let requirements: RequirementsMatrix = [
-                [cap[2].parse().unwrap(), 0, 0, 0],
-                [cap[3].parse().unwrap(), 0, 0, 0],
-                [cap[4].parse().unwrap(), cap[5].parse().unwrap(), 0, 0],
-                [cap[6].parse().unwrap(), 0, cap[7].parse().unwrap(), 0],
-            ];
-
-            Blueprint::new(id, requirements)
-        })
-        .collect()
-}
-
-fn pluralize<'a>(amount: u32, one: &'a str, zero_or_many: &'a str) -> &'a str {
-    if amount == 1 {
-        one
-    } else {
-        zero_or_many
-    }
+    input.lines().map(Blueprint::from).collect()
 }
