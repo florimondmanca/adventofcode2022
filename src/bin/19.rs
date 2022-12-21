@@ -1,6 +1,12 @@
-use std::{cmp::Ordering, collections::BinaryHeap};
+use std::{cmp::Ordering, collections::BinaryHeap, ops::RangeInclusive};
 
 use regex::Regex;
+
+const ORE: usize = 0;
+const CLAY: usize = 1;
+const OBSIDIAN: usize = 2;
+const GEODE: usize = 3;
+const RESOURCES: RangeInclusive<usize> = ORE..=GEODE;
 
 fn main() {
     println!("Not Enough Minerals");
@@ -10,58 +16,6 @@ fn main() {
 }
 
 fn part1(input: &str) -> Option<i32> {
-    /*
-     * Let Q be the 4x4 matrix representing the resource requirements
-     * for building each type of robot.
-     *
-     * For example, this blueprint...
-     *
-     *  Blueprint 1:
-     *      Each ore robot costs 4 ore.
-     *      Each clay robot costs 2 ore.
-     *      Each obsidian robot costs 3 ore and 14 clay.
-     *      Each geode robot costs 2 ore and 7 obsidian.
-     *
-     * ...translates to:
-     *
-     *     ( 4  2  3  2 )
-     * Q = ( 0  0  14 0 )
-     *     ( 0  0  0  7 )
-     *     ( 0  0  0  0 )
-     *       ^ore  ^obsidian
-     *          ^clay ^geode
-     *
-     * Each robot produces 1 unit of its resource type.
-     * So, the production matrix is Y = I_4 (the 4x4 identity matrix).
-     *
-     * Let R_n be the 4-vector of active robots at minute n.
-     * Then:
-     *      R_0 = (1 0 0 0).T
-     *      (Initially, we have 1 ore-collecting robot.)
-     *
-     * Let X_n be the 4-vector of the available resources at minute n.
-     * Then:
-     *      X_0 is (0 0 0 0).T
-     *      (Initially, we have no spare resources.)
-     *
-     * Let B_n be the 4-vector describing which robot, if any, we build at minute n.
-     * Each element in B_n is either 1 (build) or 0 (don't build).
-     * The fact that we may only build 1 robot at a time can be translated as:
-     *      ||B_n||_1 <= 1
-     *      (At most 1 element is 1, with the rest being 0.)
-     * The fact that we may only build a robot if we have enough resources can be translated as:
-     *      Q * B_n <= X_n (element-wise)
-     *
-     * The iteration schema is then as follows:
-     *      X_{n+1} = X_n + Y * R_n - Q * B_{n+1}
-     *      R_{n+1} = R_n + B_{n+1}
-     *
-     * For a given blueprint, the optimal build sequence B° is the one
-     * that maximizes the number of geodes after 24 minutes, i.e.:
-     *      B°(Q) = argmax_{B among the set of possible build sequences} X_n_4
-     *
-     * The answer is the sum of ID * B° for each blueprint.
-     */
     let blueprints = parse(input);
 
     let quality_levels = blueprints
@@ -77,10 +31,12 @@ fn part2(_input: &str) -> Option<u32> {
 }
 
 fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
+    // Perform a depth-first search of the set of states,
+    // using the number of found geodes as the priority.
     let mut max_geodes = 0;
     let mut queue = BinaryHeap::new();
 
-    let initial = State::new();
+    let initial = State::new(1, [1, 0, 0, 0], [1, 0, 0, 0]);
     queue.push(initial.clone());
 
     while let Some(state) = queue.pop() {
@@ -88,37 +44,27 @@ fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
             queue.push(other);
         }
 
-        max_geodes = max_geodes.max(state.geodes);
+        max_geodes = max_geodes.max(state.resources[GEODE]);
     }
 
     max_geodes
 }
 
+type Vec4 = [i32; 4];
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 struct State {
     time: i32,
-    ore_robots: i32,
-    ore: i32,
-    clay_robots: i32,
-    clay: i32,
-    obsidian_robots: i32,
-    obsidian: i32,
-    geode_robots: i32,
-    geodes: i32,
+    robots: Vec4,
+    resources: Vec4,
 }
 
 impl State {
-    fn new() -> Self {
+    fn new(time: i32, robots: Vec4, resources: Vec4) -> Self {
         Self {
-            time: 1,
-            ore_robots: 1,
-            ore: 1,
-            clay_robots: 0,
-            clay: 0,
-            obsidian_robots: 0,
-            obsidian: 0,
-            geode_robots: 0,
-            geodes: 0,
+            time,
+            robots,
+            resources,
         }
     }
 
@@ -127,29 +73,25 @@ impl State {
             return Vec::new();
         }
 
-        /*
-        We try building a robot if we have enough resources, and we don't have
-        enough robots yet to cover the maximum amount of resources required to
-        build any other kind of robot (except for geode robots: build as many of
-        those as possible).
-        */
-
         let mut next_states = Vec::new();
 
-        if self.ore > 0 && self.ore_robots < blueprint.max_ore_cost {
-            next_states.push(blueprint.ore_robot.schedule_build(&self));
-        }
+        for res in RESOURCES {
+            let requirements = match res {
+                ORE => vec![self.resources[ORE]],
+                CLAY => vec![self.resources[ORE]],
+                OBSIDIAN => vec![self.resources[ORE], self.resources[CLAY]],
+                GEODE => vec![self.resources[ORE], self.resources[OBSIDIAN]],
+                _ => panic!(),
+            };
 
-        if self.ore > 0 && self.clay_robots < blueprint.max_clay_cost {
-            next_states.push(blueprint.clay_robot.schedule_build(&self));
-        }
+            let has_requirements = requirements.into_iter().all(|amount| amount > 0);
 
-        if self.ore > 0 && self.clay > 0 && self.obsidian_robots < blueprint.max_obsidian_cost {
-            next_states.push(blueprint.obsidian_robot.schedule_build(&self));
-        }
+            let max_cost = blueprint.max_costs[res];
+            let want_more_of_this_robot = max_cost == 0 || self.robots[res] < max_cost;
 
-        if self.ore > 0 && self.obsidian > 0 {
-            next_states.push(blueprint.geode_robot.schedule_build(&self));
+            if has_requirements && want_more_of_this_robot {
+                next_states.push(blueprint.robots[res].schedule_build(&self));
+            }
         }
 
         next_states
@@ -167,39 +109,21 @@ impl PartialOrd for State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.geodes.cmp(&other.geodes)
+        self.resources[GEODE].cmp(&other.resources[GEODE])
     }
 }
 
 #[derive(Debug)]
 struct RobotBlueprint {
-    ore_robots_built: i32,
-    clay_robots_built: i32,
-    obsidian_robots_built: i32,
-    geode_robots_built: i32,
-    ore_cost: i32,
-    clay_cost: i32,
-    obsidian_cost: i32,
+    robots_built: Vec4,
+    costs: Vec4,
 }
 
 impl RobotBlueprint {
-    fn new(
-        ore_robots_built: i32,
-        clay_robots_built: i32,
-        obsidian_robots_built: i32,
-        geode_robots_built: i32,
-        ore_cost: i32,
-        clay_cost: i32,
-        obsidian_cost: i32,
-    ) -> Self {
+    fn new(robots_built: Vec4, costs: Vec4) -> Self {
         Self {
-            ore_robots_built,
-            clay_robots_built,
-            obsidian_robots_built,
-            geode_robots_built,
-            ore_cost,
-            clay_cost,
-            obsidian_cost,
+            robots_built,
+            costs,
         }
     }
 
@@ -212,30 +136,21 @@ impl RobotBlueprint {
             t = 1 + (resource_cost - resource) // resource_robots
         */
 
-        fn comp(cost: i32, amount: i32, robots: i32) -> i32 {
-            ((cost as f32 - amount as f32) / (robots as f32)).ceil() as i32
+        let mut time = 0;
+
+        for res in RESOURCES {
+            if state.resources[res] >= self.costs[res] {
+                time = time.max(1);
+                continue;
+            }
+
+            let num_to_collect = self.costs[res] as f32 - state.resources[res] as f32;
+            let num_robots = state.robots[res] as f32;
+            let num_steps = (num_to_collect / num_robots).ceil() as i32;
+            time = time.max(1 + num_steps);
         }
 
-        [
-            if state.ore >= self.ore_cost {
-                1
-            } else {
-                1 + comp(self.ore_cost, state.ore, state.ore_robots)
-            },
-            if state.clay >= self.clay_cost {
-                1
-            } else {
-                1 + comp(self.clay_cost, state.clay, state.clay_robots)
-            },
-            if state.obsidian >= self.obsidian_cost {
-                1
-            } else {
-                1 + comp(self.obsidian_cost, state.obsidian, state.obsidian_robots)
-            },
-        ]
-        .into_iter()
-        .max()
-        .unwrap()
+        time
     }
 
     fn schedule_build(&self, state: &State) -> State {
@@ -245,37 +160,25 @@ impl RobotBlueprint {
         // Generate a state that will build this robot at that time,
         // and pick up new materials in the meantime.
 
-        let mut next_state = state.clone();
+        let time = state.time + time_required;
+        let mut robots = [0, 0, 0, 0];
+        let mut resources = [0, 0, 0, 0];
 
-        next_state.time = state.time + time_required;
+        for res in RESOURCES {
+            robots[res] = state.robots[res] + self.robots_built[res];
+            resources[res] =
+                state.resources[res] - self.costs[res] + time_required * state.robots[res];
+        }
 
-        next_state.ore_robots = state.ore_robots + self.ore_robots_built;
-        next_state.ore = state.ore - self.ore_cost + time_required * state.ore_robots;
-
-        next_state.clay_robots = state.clay_robots + self.clay_robots_built;
-        next_state.clay = state.clay - self.clay_cost + time_required * state.clay_robots;
-
-        next_state.obsidian_robots = state.obsidian_robots + self.obsidian_robots_built;
-        next_state.obsidian =
-            state.obsidian - self.obsidian_cost + time_required * state.obsidian_robots;
-
-        next_state.geode_robots = state.geode_robots + self.geode_robots_built;
-        next_state.geodes = state.geodes + time_required * state.geode_robots;
-
-        next_state
+        State::new(time, robots, resources)
     }
 }
 
 #[derive(Debug)]
 struct Blueprint {
     id: i32,
-    ore_robot: RobotBlueprint,
-    clay_robot: RobotBlueprint,
-    obsidian_robot: RobotBlueprint,
-    geode_robot: RobotBlueprint,
-    max_ore_cost: i32,
-    max_clay_cost: i32,
-    max_obsidian_cost: i32,
+    robots: [RobotBlueprint; 4],
+    max_costs: Vec4,
 }
 
 impl From<&str> for Blueprint {
@@ -283,66 +186,32 @@ impl From<&str> for Blueprint {
         let re = Regex::new(r"Blueprint (\d+): Each ore robot costs (\d+) ore. Each clay robot costs (\d+) ore. Each obsidian robot costs (\d+) ore and (\d+) clay. Each geode robot costs (\d+) ore and (\d+) obsidian.").unwrap();
         let cap = re.captures(line).unwrap();
 
-        let ore_robot = RobotBlueprint::new(1, 0, 0, 0, cap[2].parse().unwrap(), 0, 0);
-        let clay_robot = RobotBlueprint::new(0, 1, 0, 0, cap[3].parse().unwrap(), 0, 0);
-        let obsidian_robot = RobotBlueprint::new(
-            0,
-            0,
-            1,
-            0,
-            cap[4].parse().unwrap(),
-            cap[5].parse().unwrap(),
-            0,
-        );
-        let geode_robot = RobotBlueprint::new(
-            0,
-            0,
-            0,
-            1,
-            cap[6].parse().unwrap(),
-            0,
-            cap[7].parse().unwrap(),
-        );
+        let id = cap[1].parse().unwrap();
 
-        let max_ore_cost = [
-            ore_robot.ore_cost,
-            clay_robot.ore_cost,
-            obsidian_robot.ore_cost,
-            geode_robot.ore_cost,
-        ]
-        .into_iter()
-        .max()
-        .unwrap();
+        let robots = [
+            RobotBlueprint::new([1, 0, 0, 0], [cap[2].parse().unwrap(), 0, 0, 0]),
+            RobotBlueprint::new([0, 1, 0, 0], [cap[3].parse().unwrap(), 0, 0, 0]),
+            RobotBlueprint::new(
+                [0, 0, 1, 0],
+                [cap[4].parse().unwrap(), cap[5].parse().unwrap(), 0, 0],
+            ),
+            RobotBlueprint::new(
+                [0, 0, 0, 1],
+                [cap[6].parse().unwrap(), 0, cap[7].parse().unwrap(), 0],
+            ),
+        ];
 
-        let max_clay_cost = [
-            ore_robot.clay_cost,
-            clay_robot.clay_cost,
-            obsidian_robot.clay_cost,
-            geode_robot.clay_cost,
-        ]
-        .into_iter()
-        .max()
-        .unwrap();
-
-        let max_obsidian_cost = [
-            ore_robot.obsidian_cost,
-            clay_robot.obsidian_cost,
-            obsidian_robot.obsidian_cost,
-            geode_robot.obsidian_cost,
-        ]
-        .into_iter()
-        .max()
-        .unwrap();
+        let max_costs = [
+            robots.iter().map(|r| r.costs[ORE]).max().unwrap(),
+            robots.iter().map(|r| r.costs[CLAY]).max().unwrap(),
+            robots.iter().map(|r| r.costs[OBSIDIAN]).max().unwrap(),
+            robots.iter().map(|r| r.costs[GEODE]).max().unwrap(),
+        ];
 
         Self {
-            id: cap[1].parse().unwrap(),
-            ore_robot,
-            clay_robot,
-            obsidian_robot,
-            geode_robot,
-            max_ore_cost,
-            max_clay_cost,
-            max_obsidian_cost,
+            id,
+            robots,
+            max_costs,
         }
     }
 }

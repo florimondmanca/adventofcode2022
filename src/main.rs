@@ -24,8 +24,8 @@ fn main() {
             Some(code) => {
                 println!("Error: target {target:?} exited with code {code}");
                 1
-            },
-            None => panic!()
+            }
+            None => panic!(),
         };
 
         println!("Stdout:\n{}", &String::from_utf8(cmd.stdout).unwrap());
