@@ -17,15 +17,20 @@ pub fn read_file(directory: &str, day: u32) -> String {
 macro_rules! solve {
     ($part_number:expr, $part_fn:ident, $input:expr) => {{
         use std::fmt::Display;
+        use std::time::Instant;
 
         fn print_result<T: Display>(func: impl FnOnce(&str) -> Option<T>, input: &str) {
-            print!("Part {}: ", $part_number);
-            match func(input) {
-                Some(value) => println!("{}", value),
+            let timer = Instant::now();
+            let result = func(input);
+            let elapsed = timer.elapsed();
+            
+            match result {
+                Some(value) => println!("{} (took {:.2?})", value, elapsed),
                 None => println!("(not solved)"),
             }
         }
 
+        print!("Part {}: ", $part_number);
         print_result($part_fn, $input);
     }};
 }
