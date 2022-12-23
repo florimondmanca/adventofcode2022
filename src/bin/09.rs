@@ -1,9 +1,10 @@
 use itertools::Itertools;
 use std::collections::HashSet;
 
-fn main() {
-    println!("Rope Bridge");
+// Rope Bridge
+// https://adventofcode.com/2022/day/9
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 9);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -103,4 +104,16 @@ fn catch_up(tail: Knot, head: Knot) -> Knot {
     };
 
     moved(tail, (dx, dy))
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 9);
+    assert_eq!(part1(input), Some(6098));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 9);
+    assert_eq!(part2(input), Some(2597));
 }

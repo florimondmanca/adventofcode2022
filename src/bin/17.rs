@@ -1,13 +1,13 @@
 use std::{collections::HashSet, ops::Range};
 
+// Pyroclastic Flow
+// https://adventofcode.com/2022/day/17
+
 fn main() {
-    println!("Pyroclastic Flow");
     part1_example();
     let input = &advent_of_code::read_file("inputs", 17);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1_example() {
@@ -267,4 +267,16 @@ impl Game {
 
         self.get_height()
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 17);
+    assert_eq!(part1(input), Some(3239));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 17);
+    assert_eq!(part2(input), None);
 }

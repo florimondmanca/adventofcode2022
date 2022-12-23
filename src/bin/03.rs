@@ -1,9 +1,10 @@
 use itertools::Itertools;
 use std::collections::HashSet;
 
-fn main() {
-    println!("Rucksack Reorganization");
+// Rucksack Reorganization
+// https://adventofcode.com/2022/day/3
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 3);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -50,4 +51,16 @@ fn get_priority(item_type: char) -> u32 {
     } else {
         return code - 'A' as u32 + 27;
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 3);
+    assert_eq!(part1(input), Some(7831));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 3);
+    assert_eq!(part2(input), Some(2683));
 }

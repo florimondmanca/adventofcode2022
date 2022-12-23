@@ -34,18 +34,3 @@ macro_rules! solve {
         print_result($part_fn, $input);
     }};
 }
-
-#[macro_export]
-macro_rules! slow {
-    ($body: expr) => {{
-        use std::env;
-
-        let skip_slow = env::args().any(|flag| flag == "--skip-slow");
-
-        if skip_slow {
-            println!("SKIPPED (slow)");
-        } else {
-            $body();
-        }
-    }};
-}

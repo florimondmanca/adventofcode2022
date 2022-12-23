@@ -1,10 +1,12 @@
 use itertools::sorted;
 
-pub fn main() {
-    println!("Calories");
-    let input = advent_of_code::read_file("inputs", 1);
-    advent_of_code::solve!(1, part1, &input);
-    advent_of_code::solve!(2, part2, &input);
+// Calorie Counting
+// https://adventofcode.com/2022/day/1
+
+fn main() {
+    let input = &advent_of_code::read_file("inputs", 1);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<u32> {
@@ -24,4 +26,16 @@ fn parse(input: &str) -> Vec<u32> {
         .split("\n\n")
         .map(|text| text.lines().map(|line| line.parse::<u32>().unwrap()).sum())
         .collect()
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 1);
+    assert_eq!(part1(input), Some(70374));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 1);
+    assert_eq!(part2(input), Some(204610));
 }

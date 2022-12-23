@@ -1,8 +1,9 @@
 use itertools::Itertools;
 
-fn main() {
-    println!("Supply Stacks");
+// Supply Stacks
+// https://adventofcode.com/2022/day/5
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 5);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -115,4 +116,16 @@ fn get_top_crates(stacks: Stacks) -> String {
         .iter()
         .map(|stack| stack.last().unwrap())
         .collect::<String>();
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 5);
+    assert_eq!(part1(input), Some("SPFMVDTZT".to_string()));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 5);
+    assert_eq!(part2(input), Some("ZFSJBPRFP".to_string()));
 }

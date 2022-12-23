@@ -1,39 +1,29 @@
 use itertools::Itertools;
 use std::{collections::HashMap, ops::Range, usize::MAX};
 
-fn main() {
-    println!("Regolith Reservoirs");
-    part1_example();
-    let input = &advent_of_code::read_file("inputs", 14);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
-}
+// Regolith Reservoirs
+// https://adventofcode.com/2022/day/14
 
-fn part1_example() {
-    let input = &advent_of_code::read_file("examples", 14);
-    let mut grid = parse(input);
+fn main() {
+    let input = &advent_of_code::read_file("inputs", 14);
+
+    let example = &advent_of_code::read_file("examples", 14);
+    let mut grid = parse(example);
     let num_grains = grid.pour_sand();
-    println!("Part 1: Example: {}", num_grains);
     grid.show();
+    println!("Example: {}", num_grains);
+
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<u32> {
     let mut grid = parse(input);
     let num_grains = grid.pour_sand();
-
     Some(num_grains)
 }
 
 fn part2(input: &str) -> Option<u32> {
-    let example = &advent_of_code::read_file("examples", 14);
-    let mut grid = parse(example);
-    grid.set_floor();
-    let num_grains = grid.pour_sand();
-    grid.show();
-    println!("Example: {}", num_grains);
-
     let mut grid = parse(input);
     grid.set_floor();
     let num_grains = grid.pour_sand();
@@ -223,4 +213,18 @@ fn parse(content: &str) -> Grid {
         ys: 0..max_y,
         floor: None,
     }
+}
+
+#[test]
+#[ignore]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 14);
+    assert_eq!(part1(input), Some(799));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 14);
+    assert_eq!(part2(input), Some(29076));
 }

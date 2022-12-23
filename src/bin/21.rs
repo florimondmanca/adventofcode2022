@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
+// Monkey Math
+// https://adventofcode.com/2022/day/21
+
 fn main() {
-    println!("Monkey Math");
     let input = &advent_of_code::read_file("inputs", 21);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -171,4 +173,16 @@ fn build_inverse(monkey: &Monkey) -> Vec<Monkey> {
             ]
         }
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 21);
+    assert_eq!(part1(input), Some(158661812617812));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 21);
+    assert_eq!(part2(input), Some(3352886133831));
 }

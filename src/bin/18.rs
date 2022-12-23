@@ -1,7 +1,9 @@
 use std::collections::{HashSet, VecDeque};
 
+// Boiling Boulders
+// https://adventofcode.com/2022/day/18
+
 fn main() {
-    println!("Boiling Boulders");
     let input = &advent_of_code::read_file("inputs", 18);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -114,4 +116,16 @@ fn make_end(cubes: &HashSet<Cube>) -> Cube {
         (max_x, max_y, max_z) = (max_x.max(cube.x), max_y.max(cube.y), max_z.max(cube.z));
     });
     Cube::new(max_x + 1, max_y + 1, max_z + 1)
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 18);
+    assert_eq!(part1(input), Some(4302));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 18);
+    assert_eq!(part2(input), Some(2492));
 }

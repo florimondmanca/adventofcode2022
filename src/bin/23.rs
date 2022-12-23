@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+// Unstable Diffusion
+// https://adventofcode.com/2022/day/23
+
 fn main() {
-    println!("Unstable Diffusion");
     let input = &advent_of_code::read_file("inputs", 23);
     advent_of_code::solve!(1, part1, input);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(2, part2, input);
-    });
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<usize> {
@@ -203,4 +203,17 @@ fn parse(input: &str) -> Board {
     }
 
     board
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 23);
+    assert_eq!(part1(input), Some(3925));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 23);
+    assert_eq!(part2(input), Some(903));
 }

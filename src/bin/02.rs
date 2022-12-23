@@ -1,6 +1,7 @@
-fn main() {
-    println!("Rock Paper Scissors");
+// Rock Paper Scissors
+// https://adventofcode.com/2022/day/2
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 2);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -70,4 +71,16 @@ fn part2(input: &str) -> Option<usize> {
     }
 
     Some(score)
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 2);
+    assert_eq!(part1(input), Some(11841));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 2);
+    assert_eq!(part2(input), Some(13022));
 }

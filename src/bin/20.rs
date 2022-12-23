@@ -1,21 +1,19 @@
+// Grove Positioning System
+// https://adventofcode.com/2022/day/20
+
 fn main() {
-    println!("Grove Positioning System");
     let input = &advent_of_code::read_file("inputs", 20);
     advent_of_code::solve!(1, part1, input);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(2, part2, input);
-    })
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<i64> {
     let mut numbers = parse(input, 1);
-
     Some(decrypt(&mut numbers, 1))
 }
 
 fn part2(input: &str) -> Option<i64> {
     let mut numbers = parse(input, 811589153);
-
     Some(decrypt(&mut numbers, 10))
 }
 
@@ -60,4 +58,17 @@ fn decrypt(numbers: &mut Vec<Number>, num_mixes: usize) -> i64 {
     let z = numbers[(zero_ix + 3000) % numbers.len()].value;
 
     x + y + z
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 20);
+    assert_eq!(part1(input), Some(8302));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 20);
+    assert_eq!(part2(input), Some(656575624777));
 }

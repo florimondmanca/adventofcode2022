@@ -1,6 +1,4 @@
 /*
-Credit:
-https://gitlab.com/landreville/advent-of-code-2022/-/blob/master/src/day16.rs
 */
 use regex::Regex;
 use std::{
@@ -8,13 +6,15 @@ use std::{
     collections::{BinaryHeap, HashMap, HashSet},
 };
 
+// Proboscidea Volcanium
+// https://adventofcode.com/2022/day/16
+
+// Kudos: https://gitlab.com/landreville/advent-of-code-2022/-/blob/master/src/day16.rs
+
 fn main() {
-    println!("Proboscidea Volcanium");
     let input = &advent_of_code::read_file("inputs", 16);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<i32> {
@@ -238,4 +238,17 @@ fn get_reach_times<'a>(network: &'a Network) -> ReachTimes<'a> {
     }
 
     reach_times
+}
+
+#[test]
+#[ignore]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 16);
+    assert_eq!(part1(input), Some(1789));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 16);
+    assert_eq!(part2(input), None);
 }

@@ -2,9 +2,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-fn main() {
-    println!("No Space Left On Device");
+// No Space Left On Device
+// https://adventofcode.com/2022/day/8
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 7);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -110,4 +111,16 @@ fn parse(content: &str) -> Rc<Directory> {
     }
 
     return root;
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 7);
+    assert_eq!(part1(input), Some(1477771));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 7);
+    assert_eq!(part2(input), Some(3579501));
 }

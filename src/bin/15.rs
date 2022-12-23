@@ -2,13 +2,13 @@ use itertools::Itertools;
 use regex::Regex;
 use std::ops::Range;
 
+// Beacon Exclusion Zone
+// https://adventofcode.com/2022/day/15
+
 fn main() {
-    println!("Beacon Exclusion Zone");
     let input = &advent_of_code::read_file("inputs", 15);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<usize> {
@@ -190,4 +190,18 @@ fn parse(content: &str) -> Vec<Sensor> {
     }
 
     sensors
+}
+
+#[test]
+#[ignore]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 15);
+    assert_eq!(part1(input), Some(4876693));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 15);
+    assert_eq!(part2(input), Some(11645454855041));
 }

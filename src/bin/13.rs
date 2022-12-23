@@ -1,13 +1,16 @@
 use itertools::Itertools;
 use std::cmp::Ordering;
+
+// Distress Signal
+// https://adventofcode.com/2022/day/13
+
+// Kudos: https://www.reddit.com/r/adventofcode/comments/zkmyh4/comment/j01mqo7/
+
 fn main() {
-    println!("Distress Signal");
     let input = &advent_of_code::read_file("inputs", 13);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
 }
-
-// Kudos to: https://www.reddit.com/r/adventofcode/comments/zkmyh4/comment/j01mqo7/
 
 fn part1(input: &str) -> Option<usize> {
     let packets = parse(input);
@@ -108,4 +111,16 @@ fn parse_packet(text: &str) -> Packet {
     } else {
         Packet::Int(text.parse::<u32>().unwrap())
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 13);
+    assert_eq!(part1(input), Some(5340));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 13);
+    assert_eq!(part2(input), Some(21276));
 }

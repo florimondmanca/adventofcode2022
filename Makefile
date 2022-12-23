@@ -1,8 +1,14 @@
 all: build
-	cargo run --bin advent_of_code
+	cargo test --bins
 
-all-slow: build
-	cargo run --bin advent_of_code -- --include-slow
+everything: build
+	cargo test --bins -- --include-ignored
+
+one:
+	cargo test --bin ${DAY}
+
+one-everything:
+	cargo test --bin ${DAY} -- --include-ignored
 
 build:
 	cargo build

@@ -1,22 +1,20 @@
+use regex::Regex;
 use std::{cmp::Ordering, collections::BinaryHeap, ops::RangeInclusive};
 
-use regex::Regex;
+// Not Enough Minerals
+// https://adventofcode.com/2022/day/19
+
+fn main() {
+    let input = &advent_of_code::read_file("inputs", 19);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
 
 const ORE: usize = 0;
 const CLAY: usize = 1;
 const OBSIDIAN: usize = 2;
 const GEODE: usize = 3;
 const RESOURCES: RangeInclusive<usize> = ORE..=GEODE;
-
-fn main() {
-    println!("Not Enough Minerals");
-    // Kudos to: https://todd.ginsberg.com/post/advent-of-code/2022/day19/
-    let input = &advent_of_code::read_file("inputs", 19);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
-}
 
 fn part1(input: &str) -> Option<i32> {
     let blueprints = parse(input);
@@ -240,4 +238,18 @@ impl From<&str> for Blueprint {
 
 fn parse(input: &str) -> Vec<Blueprint> {
     input.lines().map(Blueprint::from).collect()
+}
+
+#[test]
+#[ignore]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 19);
+    assert_eq!(part1(input), Some(1127));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 19);
+    assert_eq!(part2(input), Some(21546));
 }

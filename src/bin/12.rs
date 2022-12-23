@@ -1,12 +1,12 @@
 use std::collections::{HashMap, VecDeque};
 
+// Hill Climbing Algorithm
+// https://adventofcode.com/2022/day/12
+
 fn main() {
-    println!("Hill Climbing Algorithm");
     let input = &advent_of_code::read_file("inputs", 12);
-    advent_of_code::slow!(|| {
-        advent_of_code::solve!(1, part1, input);
-        advent_of_code::solve!(2, part2, input);
-    });
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
 }
 
 fn part1(input: &str) -> Option<usize> {
@@ -139,4 +139,18 @@ fn parse(content: &str) -> (Heights, Node, Node) {
     }
 
     (heights, start.unwrap(), end.unwrap())
+}
+
+#[test]
+#[ignore]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 12);
+    assert_eq!(part1(input), Some(391));
+}
+
+#[test]
+#[ignore]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 12);
+    assert_eq!(part2(input), Some(386));
 }

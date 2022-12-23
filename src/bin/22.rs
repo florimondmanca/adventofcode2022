@@ -1,16 +1,18 @@
 use std::ops::Add;
 
-const RIGHT: usize = 0;
-const DOWN: usize = 1;
-const LEFT: usize = 2;
-const UP: usize = 3;
+// Monkey Map
+// https://adventofcode.com/2022/day/22
 
 fn main() {
-    println!("Monkey Map");
     let input = &advent_of_code::read_file("inputs", 22);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
 }
+
+const RIGHT: usize = 0;
+const DOWN: usize = 1;
+const LEFT: usize = 2;
+const UP: usize = 3;
 
 #[derive(Debug, Clone, Copy)]
 struct Vec2D {
@@ -206,4 +208,16 @@ fn parse(input: &str) -> (Map, Vec<Command>) {
     }
 
     (map, commands)
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 22);
+    assert_eq!(part1(input), Some(88268));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 22);
+    assert_eq!(part2(input), None);
 }

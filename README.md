@@ -8,16 +8,22 @@ Rust code solutions to [Advent Of Code 2022](https://adventofcode.com/2022/).
 
 ## Usage
 
-Compute and show solutions using:
+Run puzzles using:
 
 ```
 make
 ```
 
-Some solutions take a long time to compute, so they're skipped by default. To compute them too, use:
+Some puzzles take a long time to solve. They are ignored by default. To solve them too, use:
 
 ```
-make all-slow
+make everything
+```
+
+Run a specific day:
+
+```
+make one DAY=03
 ```
 
 ## Index

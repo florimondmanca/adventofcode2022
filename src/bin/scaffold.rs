@@ -1,11 +1,7 @@
 use std::{env, fs::OpenOptions, io::Write, process};
 
-const TEMPLATE: &str = r###"fn main() {
-    println!("Title");
-    let input = &advent_of_code::read_file("inputs", $day);
-    advent_of_code::solve!(1, part1, input);
-    advent_of_code::solve!(2, part2, input);
-}
+const TEMPLATE: &str = r###"// Day $day
+// https://adventofcode.com/2022/day/$day
 
 fn part1(input: &str) -> Option<u32> {
     None
@@ -13,6 +9,18 @@ fn part1(input: &str) -> Option<u32> {
 
 fn part2(input: &str) -> Option<u32> {
     None
+}
+
+#[test]
+fn test_$daypadded_part1() {
+    let input = &advent_of_code::read_file("inputs", $day);
+    assert_eq!(part1(input), None);
+}
+
+#[test]
+fn test_$daypadded_part2() {
+    let input = &advent_of_code::read_file("inputs", $day);
+    assert_eq!(part2(input), None);
 }
 "###;
 
@@ -45,7 +53,12 @@ fn main() {
         .create_new(true)
         .open(bin_path)
         .expect("Failed to create bin file")
-        .write_all(TEMPLATE.replace("$day", &day.to_string()).as_bytes())
+        .write_all(
+            TEMPLATE
+                .replace("$daypadded", &format!("{day:02}"))
+                .replace("$day", &day.to_string())
+                .as_bytes(),
+        )
         .expect("Failed to write bin file");
 
     let input_path = format!("src/inputs/{day:02}.txt");

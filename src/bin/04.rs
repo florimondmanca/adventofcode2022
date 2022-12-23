@@ -1,9 +1,10 @@
 use itertools::Itertools;
 
-fn main() {
-    println!("Camp Cleanup");
+// Camp Cleanup
+// https://adventofcode.com/2022/day/4
 
-    let input = &advent_of_code::read_file("inputs", 4);
+fn main() {
+    let input = &advent_of_code::read_file("inputs", 3);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
 }
@@ -72,4 +73,16 @@ fn read_ranges(line: &str) -> (Range, Range) {
         })
         .collect_tuple()
         .unwrap()
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 4);
+    assert_eq!(part1(input), Some(526));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 4);
+    assert_eq!(part2(input), Some(886));
 }

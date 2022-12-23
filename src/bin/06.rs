@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 
-fn main() {
-    println!("Tuning Trouble");
+// Tuning Trouble
+// https://adventofcode.com/2022/day/6
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 6);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -39,4 +40,16 @@ fn find_marker_start(size: usize, input: &str) -> usize {
             return num_processed;
         }
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 6);
+    assert_eq!(part1(input), Some(1640));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 6);
+    assert_eq!(part2(input), Some(3613));
 }

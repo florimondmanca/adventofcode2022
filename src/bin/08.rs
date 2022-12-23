@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use take_until::TakeUntilExt;
 
-fn main() {
-    println!("Treetop Tree House");
+// Treetop Tree House
+// https://adventofcode.com/2022/day/8
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 8);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -134,4 +135,16 @@ fn maximize_scenic_score(grid: &Grid) -> u32 {
     }
 
     highest
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 8);
+    assert_eq!(part1(input), Some(1736));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 8);
+    assert_eq!(part2(input), Some(268800));
 }

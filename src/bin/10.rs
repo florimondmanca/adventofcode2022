@@ -1,6 +1,7 @@
-fn main() {
-    println!("Cathode-Ray Tube");
+// Cathode-Ray Tube
+// https://adventofcode.com/2022/day/10
 
+fn main() {
     let input = &advent_of_code::read_file("inputs", 10);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -64,4 +65,25 @@ where
             x += dx;
         }
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 10);
+    assert_eq!(part1(input), Some(13680));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 10);
+    let image = "
+###..####..##..###..#..#.###..####.###..
+#..#....#.#..#.#..#.#.#..#..#.#....#..#.
+#..#...#..#....#..#.##...#..#.###..###..
+###...#...#.##.###..#.#..###..#....#..#.
+#....#....#..#.#....#.#..#....#....#..#.
+#....####..###.#....#..#.#....####.###..
+"
+    .to_string();
+    assert_eq!(part2(input), Some(image));
 }

@@ -4,8 +4,10 @@ use std::{
     collections::{HashMap, VecDeque},
 };
 
+// Monkey in the Middle
+// https://adventofcode.com/2022/day/11
+
 fn main() {
-    println!("Monkey in the Middle");
     let input = &advent_of_code::read_file("inputs", 11);
     advent_of_code::solve!(1, part1, input);
     advent_of_code::solve!(2, part2, input);
@@ -141,4 +143,16 @@ impl<'a> From<&'a str> for Operation<'a> {
         let (left, op, right) = value.split(" ").collect_tuple().unwrap();
         Self::new(left, right, op)
     }
+}
+
+#[test]
+fn test_part1() {
+    let input = &advent_of_code::read_file("inputs", 11);
+    assert_eq!(part1(input), Some(58794));
+}
+
+#[test]
+fn test_part2() {
+    let input = &advent_of_code::read_file("inputs", 11);
+    assert_eq!(part2(input), Some(20151213744));
 }
