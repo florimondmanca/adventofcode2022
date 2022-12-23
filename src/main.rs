@@ -4,7 +4,7 @@ use std::{
 };
 
 fn main() {
-    (22..=22).for_each(|day| {
+    (1..=23).for_each(|day| {
         let target = format!("{day:02}");
 
         let mut args = vec!["run", "--bin", &target, "--"];
