@@ -42,7 +42,7 @@ fn part2(input: &str) -> Option<i32> {
 }
 
 fn maximize_geodes(blueprint: &Blueprint, max_time: i32) -> i32 {
-    // Perform a depth-first search on the set of possible states,
+    // Perform a depth-first search (DFS) on the set of possible states,
     // using the number of geodes as the heuristic,
     // skipping states for which we cannot ever beat the best amount we found so far.
     let mut max_geodes = 0;

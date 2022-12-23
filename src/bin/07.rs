@@ -92,7 +92,7 @@ fn parse(content: &str) -> Rc<Directory> {
                 "/" => cwd = Rc::clone(&root),
                 ".." => cwd = Rc::clone(&cwd.parent.as_ref().unwrap()),
                 dirname => {
-                    let d = cwd.sub_dirs.borrow().get(dirname).unwrap().clone();
+                    let d = cwd.sub_dirs.borrow()[dirname].clone();
                     cwd = d;
                 }
             },

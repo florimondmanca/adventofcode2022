@@ -48,16 +48,16 @@ where
         for (i, monkey) in monkeys.iter().enumerate() {
             let num_inspected = monkey.items.borrow().len();
 
-            inspected.insert(i, inspected.get(&i).unwrap() + num_inspected as u128);
+            inspected.insert(i, inspected[&i] + num_inspected as u128);
 
             while let Some(worry_level) = monkey.items.borrow_mut().pop_front() {
                 let mut worry_level = monkey.operation.apply(worry_level);
                 worry_level = relieve(worry_level);
 
                 let target = if worry_level % monkey.divisor == 0 {
-                    monkeys.get(monkey.true_monkey).unwrap()
+                    &monkeys[monkey.true_monkey]
                 } else {
-                    monkeys.get(monkey.false_monkey).unwrap()
+                    &monkeys[monkey.false_monkey]
                 };
 
                 target.items.borrow_mut().push_back(worry_level);
@@ -76,40 +76,24 @@ fn parse(input: &str) -> Vec<Monkey> {
         .map(
             |(items_line, operation_line, divisor_line, true_monkey_line, false_monkey_line)| {
                 let items = RefCell::new(
-                    items_line
-                        .trim()
-                        .get("Starting items :".len()..)
-                        .unwrap()
+                    items_line.trim()["Starting items :".len()..]
                         .split(", ")
                         .map(|x| x.parse::<u128>().unwrap())
                         .collect(),
                 );
 
-                let operation = Operation::from(
-                    operation_line
-                        .trim()
-                        .get("Operation: new = ".len()..)
-                        .unwrap(),
-                );
+                let operation =
+                    Operation::from(&operation_line.trim()["Operation: new = ".len()..]);
 
-                let divisor = divisor_line
-                    .trim()
-                    .get("Test: divisible by ".len()..)
-                    .unwrap()
+                let divisor = divisor_line.trim()["Test: divisible by ".len()..]
                     .parse::<u128>()
                     .unwrap();
 
-                let true_monkey = true_monkey_line
-                    .trim()
-                    .get("If true: throw to monkey ".len()..)
-                    .unwrap()
+                let true_monkey = true_monkey_line.trim()["If true: throw to monkey ".len()..]
                     .parse::<usize>()
                     .unwrap();
 
-                let false_monkey = false_monkey_line
-                    .trim()
-                    .get("If false: throw to monkey ".len()..)
-                    .unwrap()
+                let false_monkey = false_monkey_line.trim()["If false: throw to monkey ".len()..]
                     .parse::<usize>()
                     .unwrap();
 

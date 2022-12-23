@@ -9,11 +9,11 @@ fn main() {
 fn part1(input: &str) -> Option<usize> {
     let mut score = 0;
 
-    let score_matrix = vec![
-        //           X, Y, Z (player)
-        /* A */ vec![3, 6, 0],
-        /* B */ vec![0, 3, 6],
-        /* C */ vec![6, 0, 3],
+    let score_matrix = [
+        //       X, Y, Z (player)
+        /* A */ [3, 6, 0],
+        /* B */ [0, 3, 6],
+        /* C */ [6, 0, 3],
         /* (opponent) */
     ];
 

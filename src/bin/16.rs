@@ -149,7 +149,7 @@ fn parse<'a>(content: &str, valves: &'a mut Vec<Valve>) -> Network<'a> {
     let mut network: Network = HashMap::new();
 
     for valve in valves.iter() {
-        for neighbor in neighbors.get(&valve.name).unwrap() {
+        for neighbor in neighbors[&valve.name].iter() {
             let neighbor_valve = valves.iter().find(|v| &v.name == neighbor).unwrap();
             network
                 .entry(valve)
@@ -214,9 +214,7 @@ fn get_reach_times<'a>(network: &'a Network) -> ReachTimes<'a> {
                 continue;
             }
 
-            for neighbor in network.get(valve).unwrap() {
-                let neighbor = *neighbor;
-
+            for &neighbor in network[valve].iter() {
                 // Moving from one valve to another takes 1 minute.
                 let new_total_time = total_time + 1;
 

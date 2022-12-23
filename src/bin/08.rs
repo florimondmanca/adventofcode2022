@@ -33,7 +33,7 @@ impl Grid {
     }
 
     fn get(&self, row: usize, col: usize) -> u32 {
-        self.map.get(&(row, col)).unwrap().clone()
+        self.map[&(row, col)].clone()
     }
 }
 

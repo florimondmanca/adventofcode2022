@@ -62,16 +62,16 @@ fn solve(heights: &Heights, start: Node, end: Node) -> usize {
             return path.len();
         }
 
-        let h = *heights.get(&node).unwrap();
+        let h = heights[&node];
 
         for neighbor in find_neighbors(heights, node) {
-            let neighbor_h = *heights.get(&neighbor).unwrap();
+            let neighbor_h = heights[&neighbor];
 
             if neighbor_h > h + 1 {
                 continue;
             }
 
-            let tentative_cost = costs.get(&node).unwrap() + 1;
+            let tentative_cost = costs[&node] + 1;
 
             if tentative_cost < *costs.get(&neighbor).unwrap_or(&u32::MAX) {
                 costs.insert(neighbor, tentative_cost);
