@@ -23,7 +23,7 @@ macro_rules! solve {
             let timer = Instant::now();
             let result = func(input);
             let elapsed = timer.elapsed();
-            
+
             match result {
                 Some(value) => println!("{} (took {:.2?})", value, elapsed),
                 None => println!("(not solved)"),
