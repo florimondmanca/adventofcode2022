@@ -1,4 +1,9 @@
-use std::ops::{Add, Mul, Range};
+use std::ops::Add;
+
+const RIGHT: usize = 0;
+const DOWN: usize = 1;
+const LEFT: usize = 2;
+const UP: usize = 3;
 
 fn main() {
     println!("Monkey Map");
@@ -9,12 +14,12 @@ fn main() {
 
 #[derive(Debug, Clone, Copy)]
 struct Vec2D {
-    x: i32,
-    y: i32,
+    x: usize,
+    y: usize,
 }
 
 impl Vec2D {
-    fn new(x: i32, y: i32) -> Self {
+    fn new(x: usize, y: usize) -> Self {
         Self { x, y }
     }
 }
@@ -27,99 +32,101 @@ impl Add for Vec2D {
     }
 }
 
-impl Mul<i32> for Vec2D {
-    type Output = Self;
-
-    fn mul(self, rhs: i32) -> Self::Output {
-        Self::new(self.x * rhs, self.y * rhs)
-    }
-}
-
-fn part1(input: &str) -> Option<i32> {
+fn part1(input: &str) -> Option<usize> {
     let (map, commands) = parse(input);
 
-    let mut pos = Vec2D::new(
-        (map[0].range.start + map[0].tiles.iter().position(|&x| x == '.').unwrap()) as i32,
-        0,
-    );
-
-    let mut direction = 0;
+    let mut pos = Vec2D::new(map[1].iter().position(|i| *i == Tile::Open).unwrap(), 1);
+    let mut direction = RIGHT;
 
     for command in commands {
         match command {
             Command::MoveForward(n) => {
                 for _ in 0..n {
-                    let mut new_pos = pos
-                        + match direction {
-                            0 => Vec2D::new(1, 0),
-                            1 => Vec2D::new(0, 1),
-                            2 => Vec2D::new(-1, 0),
-                            3 => Vec2D::new(0, -1),
-                            _ => panic!(),
-                        };
+                    let mut new_pos = match direction {
+                        RIGHT => Vec2D::new(pos.x + 1, pos.y),
+                        DOWN => Vec2D::new(pos.x, pos.y + 1),
+                        LEFT => Vec2D::new(pos.x - 1, pos.y),
+                        _ => Vec2D::new(pos.x, pos.y - 1),
+                    };
 
-                    // TODO: these y positions may not be accessible
-
-                    let ymax = (0..map.len())
-                        .rev()
-                        .filter(|&y| map[y].range.contains(&(pos.x as usize)))
-                        .nth(0)
-                        .unwrap() as i32;
-
-                    let ymin = (0..map.len())
-                        .filter(|&y| map[y].range.contains(&(pos.x as usize)))
-                        .nth(0)
-                        .unwrap() as i32;
-
-                    if new_pos.y < ymin {
-                        new_pos.y = ymax;
+                    if map[new_pos.y][new_pos.x] == Tile::Nothing {
+                        match direction {
+                            RIGHT => {
+                                new_pos.x = map[pos.y]
+                                    .iter()
+                                    .position(|tile| *tile != Tile::Nothing)
+                                    .unwrap();
+                            }
+                            DOWN => {
+                                new_pos.y = map
+                                    .iter()
+                                    .position(|row| row[pos.x] != Tile::Nothing)
+                                    .unwrap();
+                            }
+                            LEFT => {
+                                new_pos.x = map[pos.y].len()
+                                    - 1
+                                    - map[pos.y]
+                                        .iter()
+                                        .rev()
+                                        .position(|tile| *tile != Tile::Nothing)
+                                        .unwrap();
+                            }
+                            _ => {
+                                new_pos.y = map.len()
+                                    - 1
+                                    - map
+                                        .iter()
+                                        .rev()
+                                        .position(|row| row[pos.x] != Tile::Nothing)
+                                        .unwrap();
+                            }
+                        }
                     }
 
-                    if new_pos.y >= ymax {
-                        new_pos.y = ymin;
-                    }
-
-                    let row = &map[new_pos.y as usize];
-
-                    if new_pos.x < row.range.start as i32 {
-                        new_pos.x = row.range.end as i32;
-                    }
-
-                    if new_pos.x >= row.range.end as i32 {
-                        new_pos.x = row.range.start as i32;
-                    }
-
-                    let next_tile = row.tiles[new_pos.x as usize - row.range.start];
-
-                    if next_tile == '#' {
+                    if map[new_pos.y][new_pos.x] == Tile::Open {
+                        pos = new_pos;
+                    } else {
                         break;
                     }
-
-                    pos = new_pos;
                 }
             }
             Command::TurnLeft => {
-                direction = (((direction - 1) % 4) + 4) % 4;
+                direction = match direction {
+                    UP => LEFT,
+                    LEFT => DOWN,
+                    DOWN => RIGHT,
+                    RIGHT => UP,
+                    _ => unreachable!(),
+                };
             }
             Command::TurnRight => {
-                direction = (direction + 1) % 4;
+                direction = match direction {
+                    UP => RIGHT,
+                    RIGHT => DOWN,
+                    DOWN => LEFT,
+                    LEFT => UP,
+                    _ => unreachable!(),
+                };
             }
         }
     }
 
-    Some((pos.y + 1) * 1000 + 4 * (pos.x + 1) + direction)
+    Some(pos.y * 1000 + 4 * pos.x + direction)
 }
 
 fn part2(_input: &str) -> Option<u32> {
     None
 }
 
-struct Row {
-    range: Range<usize>,
-    tiles: Vec<char>,
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Tile {
+    Nothing,
+    Open,
+    Wall,
 }
 
-type Map = Vec<Row>;
+type Map = Vec<Vec<Tile>>;
 
 #[derive(Debug)]
 enum Command {
@@ -129,21 +136,45 @@ enum Command {
 }
 
 fn parse(input: &str) -> (Map, Vec<Command>) {
-    let mut rows: Vec<Row> = Vec::new();
+    let (map_input, commands_input) = input.split_once("\n\n").unwrap();
 
-    let num_lines = input.lines().count();
+    let mut map: Map = Vec::new();
+    let mut max = 0;
 
-    for line in input.lines().take(num_lines - 2) {
-        let start = line.chars().take_while(|&c| c == ' ').count();
-        let tiles = line.replace(" ", "").chars().collect::<Vec<_>>();
-        let range = start..start + tiles.len();
-        rows.push(Row { range, tiles });
+    for line in map_input.lines() {
+        let mut row = Vec::new();
+
+        // Left padding
+        row.push(Tile::Nothing);
+
+        max = max.max(line.len());
+
+        for c in line.chars() {
+            row.push(match c {
+                '.' => Tile::Open,
+                '#' => Tile::Wall,
+                ' ' => Tile::Nothing,
+                _ => unreachable!(),
+            });
+        }
+
+        // Fill remaining width.
+        row.extend(vec![Tile::Nothing; max - line.len()]);
+
+        // Right padding
+        row.push(Tile::Nothing);
+
+        map.push(row);
     }
 
+    // Top padding
+    map.insert(0, vec![Tile::Nothing; map[0].len()]);
+
+    // Bottom padding
+    map.push(vec![Tile::Nothing; map[0].len()]);
+
+    let instructions = commands_input.chars().collect::<Vec<_>>();
     let mut commands = Vec::new();
-
-    let instructions = input.lines().last().unwrap().chars().collect::<Vec<_>>();
-
     let mut start = 0;
     let mut current = 0;
 
@@ -174,5 +205,5 @@ fn parse(input: &str) -> (Map, Vec<Command>) {
         start = current;
     }
 
-    (rows, commands)
+    (map, commands)
 }
