@@ -61,9 +61,9 @@ type Blizzards = HashMap<Point2D, Vec<Direction>>;
 struct Board {
     width: usize,
     height: usize,
+    blizzards: Blizzards,
     start: Point2D,
     destination: Point2D,
-    blizzards: Blizzards,
 }
 
 impl Board {
@@ -71,9 +71,9 @@ impl Board {
         Self {
             width,
             height,
+            blizzards,
             start: (0, 1),
             destination: (height - 1, width - 2),
-            blizzards,
         }
     }
 
@@ -172,18 +172,16 @@ impl From<&str> for Board {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-struct Visit {
-    steps: u32,
-    pos: Point2D,
-}
+struct Visit(u32, Point2D);
 
 impl Visit {
     fn new(steps: u32, pos: Point2D) -> Self {
-        Self { steps, pos }
+        Self(steps, pos)
     }
 }
+
 fn solve(start: Point2D, destination: Point2D, boards: &mut HashMap<u32, Board>) -> (u32, Board) {
-    // Bread-first search (BFS) through the changing board.
+    // Breadth-first search (BFS) through the changing board.
     let mut queue = VecDeque::new();
     let mut seen = HashSet::new();
 
@@ -195,29 +193,32 @@ fn solve(start: Point2D, destination: Point2D, boards: &mut HashMap<u32, Board>)
         if !seen.insert(v.clone()) {
             continue;
         }
-        
-        let next_steps = v.steps + 1;
+
+        let Visit(steps, pos) = v;
+
+        let next_steps = steps + 1;
 
         if !boards.contains_key(&next_steps) {
-            boards.insert(next_steps, boards.get(&v.steps).unwrap().next());
+            boards.insert(next_steps, boards.get(&steps).unwrap().next());
         }
 
         let next_board = boards.get(&next_steps).unwrap();
 
-        // Maybe we can stay here.
-        if next_board.is_ground(&v.pos) {
-            queue.push_back(Visit::new(next_steps, v.pos.clone()));
+        // Maybe we can reach the destination if we stay here and wait for
+        // blizzards to move some more.
+        if next_board.is_ground(&pos) {
+            queue.push_back(Visit::new(next_steps, pos.clone()));
         }
 
-        let neighbors = next_board.get_neighbors(&v.pos);
+        let neighbors = next_board.get_neighbors(&pos);
 
-        // Maybe the next board allows us to reach the destination.
         if neighbors.iter().any(|&p| p == destination) {
+            // We're just a step away from the destination.
             return (next_steps, next_board.clone());
         }
 
+        // Maybe we can reach the destination through one of the neighboring ground tiles.
         for p in neighbors {
-            // Maybe we can reach the destination through one of the neighboring ground tiles.
             if p == start || (next_board.is_in_bounds(&p) && next_board.is_ground(&p)) {
                 queue.push_back(Visit::new(next_steps, p));
             }
