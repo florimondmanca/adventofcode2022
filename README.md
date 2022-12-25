@@ -41,13 +41,16 @@ make one DAY=03
 | `Vec<Vec<_>>` manipulation (e.g. grids) | 5, 22, 23 | |
 | Collection indexing | 7, 8, 11, 12, 16, 19, 23 | `vec[idx]`, `map[idx]`, etc |
 | Range (`a..b`)) | 5, 8, 9, 14, 18 | |
-| RangeInclusive (`a..=b`) | 19, 23 | |
+| RangeInclusive (`a..=b`) | 19, 23, 25 | |
 | Struct | 4, 5, ... | |
 | Enum | 13, 23, 24 | |
 | Module constants | 19 | |
-| `loop { ... } ` | 6, 14, 17, 24 | |
-| `match` | 7, 9, 11, 13, 14, 17, 19, 21, 22, 23, 24 | |
-| `Some` / `None` | 7, 12, 13, 14, 24 | |
+| `loop { ... } ` | 6, 14, 17, 24, 25 | |
+| `match` | 7, 9, 11, 13, 14, 17, 19, 21, 22, 23, 24, 25 | |
+| `match if cond` | 24, 25 | Match guards |
+| `_ => unreachable!()` | 22, 23, 25 | Marking unreachable match branches |
+| `Some` / `None` | 7, 12, 13, 14, 24, ... | |
+| `if let Some(...) = ...` | 21 | |
 | `while let Some(...) = ...` | 11, 12, 18 | |
 | Integer maths | 9 | `abs()`, `signum()`, `%` |
 | Type aliases | 5, ... | |
@@ -66,7 +69,9 @@ make one DAY=03
 | `Rc` | 7 | A solution for circular references (e.g. trees). Full discussion: [Rust data structures with circular references](https://eli.thegreenplace.net/2021/rust-data-structures-with-circular-references/) |
 | `impl Add` (operator overloading) | 22 | Custom `a + b` |
 | `impl Ord` and `impl PartialOrd` | 13, 16, 19 | Allows custom sorting. See [page in the Book](https://doc.rust-lang.org/stable/book/appendix-03-derivable-traits.html#partialord-and-ord-for-ordering-comparisons) | 
-| `impl From<T>` | 19, 24 | Custom `::from(...)` implementation. |
+| `impl From<T>` | 19, 24, 25 | Custom `::from(...)` implementation. |
+| `impl std::fmt::Display` | 25 | Custom `print!(...)` rendering implementation. |
+| `impl std::fmt::Debug` | 25 | Custom `dbg!(...)` rendering implementation. |
 | Breadth-first search (BFS) | 12, 18, 24 | |
 | Depth-first search (DFS) | 19 | |
 

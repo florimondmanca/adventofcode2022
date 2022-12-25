@@ -5,7 +5,7 @@ everything: build
 	cargo test --bins -- --include-ignored
 
 one:
-	cargo test --bin ${DAY}
+	cargo test --bin ${DAY} -- --show-output
 
 one-everything:
 	cargo test --bin ${DAY} -- --include-ignored
