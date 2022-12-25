@@ -216,14 +216,14 @@ fn parse(content: &str) -> Grid {
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part1() {
     let input = &advent_of_code::read_file("inputs", 14);
     assert_eq!(part1(input), Some(799));
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part2() {
     let input = &advent_of_code::read_file("inputs", 14);
     assert_eq!(part2(input), Some(29076));

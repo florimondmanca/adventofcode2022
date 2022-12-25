@@ -142,14 +142,14 @@ fn parse(content: &str) -> (Heights, Node, Node) {
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part1() {
     let input = &advent_of_code::read_file("inputs", 12);
     assert_eq!(part1(input), Some(391));
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part2() {
     let input = &advent_of_code::read_file("inputs", 12);
     assert_eq!(part2(input), Some(386));

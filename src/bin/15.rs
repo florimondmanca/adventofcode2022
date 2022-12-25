@@ -193,14 +193,14 @@ fn parse(content: &str) -> Vec<Sensor> {
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part1() {
     let input = &advent_of_code::read_file("inputs", 15);
     assert_eq!(part1(input), Some(4876693));
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part2() {
     let input = &advent_of_code::read_file("inputs", 15);
     assert_eq!(part2(input), Some(11645454855041));

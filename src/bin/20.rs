@@ -67,7 +67,7 @@ fn test_part1() {
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part2() {
     let input = &advent_of_code::read_file("inputs", 20);
     assert_eq!(part2(input), Some(656575624777));

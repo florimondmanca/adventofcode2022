@@ -3,6 +3,12 @@ use std::{env, fs::OpenOptions, io::Write, process};
 const TEMPLATE: &str = r###"// Day $day
 // https://adventofcode.com/2022/day/$day
 
+fn main() {
+    let input = &advent_of_code::read_file("inputs", $day);
+    advent_of_code::solve!(1, part1, input);
+    advent_of_code::solve!(2, part2, input);
+}
+
 fn part1(input: &str) -> Option<u32> {
     None
 }

@@ -241,7 +241,7 @@ fn get_reach_times<'a>(network: &'a Network) -> ReachTimes<'a> {
 }
 
 #[test]
-#[ignore]
+#[ignore = "slow"]
 fn test_part1() {
     let input = &advent_of_code::read_file("inputs", 16);
     assert_eq!(part1(input), Some(1789));
